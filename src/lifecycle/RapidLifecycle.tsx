@@ -1,5 +1,6 @@
 import React from "react";
-import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { Audio } from "@remotion/media";
+import { AbsoluteFill, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { BRAND, fontFamily } from "../brand";
 import { LOGO_SLASH_CENTER_X, MesonRapidLogo } from "../MesonRapidLogo";
 import {
@@ -176,6 +177,21 @@ const Chain: React.FC<{ scale: number; logoScreenScale: number }> = ({ scale, lo
   );
 };
 
+// ElevenLabs Music tracks (30s, generated for this video). Switch between the
+// two variations here.
+const MUSIC = "audio/lifecycle-music-a.mp3";
+const MUSIC_VOLUME = 0.8;
+
+const Music: React.FC = () => (
+  <Audio
+    src={staticFile(MUSIC)}
+    // Short fade in; fade out as the logo holds at the end.
+    volume={(f) =>
+      interpolate(f, [0, 12, LIFECYCLE_DURATION - 50, LIFECYCLE_DURATION - 2], [0, MUSIC_VOLUME, MUSIC_VOLUME, 0], clamp)
+    }
+  />
+);
+
 const Backdrop: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AbsoluteFill
     style={{
@@ -185,6 +201,7 @@ const Backdrop: React.FC<{ children: React.ReactNode }> = ({ children }) => (
       overflow: "hidden",
     }}
   >
+    <Music />
     {children}
   </AbsoluteFill>
 );
