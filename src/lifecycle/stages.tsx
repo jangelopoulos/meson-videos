@@ -2,6 +2,8 @@ import React from "react";
 import { Easing, Img, interpolate, staticFile } from "remotion";
 import {
   Bubble,
+  CARD_PAD,
+  CARD_RADIUS,
   Check,
   DatabaseIcon,
   FlowDot,
@@ -125,7 +127,7 @@ const Ring: React.FC<{ c: { x: number; y: number }; d: number; color: string; p:
 );
 
 const ENQUIRY_Y = ORBIT1_H + 18;
-export const LEAD_H = ENQUIRY_Y + 78;
+export const LEAD_H = ENQUIRY_Y + 86;
 
 export const LeadStage: React.FC<StageProps> = ({ t }) => {
   const flowStart = 34;
@@ -194,7 +196,7 @@ export const LeadStage: React.FC<StageProps> = ({ t }) => {
         <OrbitBubble key={b.key} b={b} t={t} enterAt={8 + i * 3} center={C1} />
       ))}
 
-      <div style={{ position: "absolute", left: 0, top: ENQUIRY_Y, width: COL_W, ...cardStyle, padding: "14px 18px 16px", ...rise(t, 50) }}>
+      <div style={{ position: "absolute", left: 0, top: ENQUIRY_Y, width: COL_W, ...cardStyle, padding: "18px 22px 20px", ...rise(t, 50) }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}>
           <span style={{ fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em" }}>New enquiry received</span>
           <span style={{ fontSize: 12, color: K.tealDark, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>09:14</span>
@@ -213,7 +215,7 @@ export const LeadStage: React.FC<StageProps> = ({ t }) => {
 // 02 Called within 10 minutes: rings, connects, voice waveform talks, and a
 // timer clock sweeps to 7 minutes.
 // ---------------------------------------------------------------------------
-export const CALL_H = 213;
+export const CALL_H = 225;
 
 const VOICE = [8, 14, 20, 12, 22, 16, 10, 18, 24, 14, 8, 16, 20, 12, 18, 10, 22, 14, 9, 17, 21, 12];
 
@@ -282,7 +284,7 @@ export const CallStage: React.FC<StageProps> = ({ t }) => {
   const clockDone = prog(t, 58, 10);
   const minute = Math.round(14 + 7 * clock);
   return (
-    <div style={{ width: COL_W, ...cardStyle, padding: 18, ...rise(t, 0) }}>
+    <div style={{ width: COL_W, ...cardStyle, padding: CARD_PAD, ...rise(t, 0) }}>
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
         <span style={{ position: "relative", width: 52, height: 52, flex: "none" }}>
           <Img src={asset("meson-caller.jpg")} style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover", objectPosition: "52% 24%", display: "block" }} />
@@ -338,7 +340,7 @@ export const CallStage: React.FC<StageProps> = ({ t }) => {
           </span>
         </span>
       </div>
-      <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${K.line}`, display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${K.line}`, display: "flex", alignItems: "center", gap: 12 }}>
         <TimerClock p={clock} done={clockDone} />
         <div style={{ fontSize: 13, color: K.body, lineHeight: 1.4 }}>
           <span style={{ fontWeight: 600, color: K.ink, fontVariantNumeric: "tabular-nums" }}>09:{String(minute).padStart(2, "0")}</span>
@@ -355,7 +357,7 @@ export const CallStage: React.FC<StageProps> = ({ t }) => {
 // 03 Qualified, or filtered out: fields fill, the recording plays, the
 // transcript writes itself live, then "Qualified" is ticked.
 // ---------------------------------------------------------------------------
-export const QUAL_H = 421;
+export const QUAL_H = 452;
 
 const REC = [6, 10, 16, 9, 18, 12, 7, 14, 20, 11, 6, 13, 17, 9, 5, 12, 15, 8, 11, 6, 9, 14, 7, 10, 8, 5, 11, 7, 4, 9, 6, 10, 5, 8, 4, 7, 9, 5];
 const QUOTE = `"Downsizing once the youngest finishes school. We'd want a price guide first."`;
@@ -364,7 +366,7 @@ const typeEnd = QUAL_TIMING.typeStart + QUOTE.length / QUAL_TIMING.charsPerFrame
 const QUALIFIED_AT = Math.round(typeEnd) + 6;
 
 const Field: React.FC<{ label: string; value: string; dot?: boolean; t: number; at: number }> = ({ label, value, dot, t, at }) => (
-  <div style={{ background: K.soft, borderRadius: 10, padding: "9px 12px", ...rise(t, at, 12, 8) }}>
+  <div style={{ background: K.soft, borderRadius: 16, padding: "11px 14px", ...rise(t, at, 12, 8) }}>
     <div style={{ fontSize: 12, color: K.muted }}>{label}</div>
     <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em", marginTop: 2 }}>
       {dot ? <span style={{ width: 7, height: 7, borderRadius: "50%", background: K.tealDark }} /> : null}
@@ -384,7 +386,7 @@ export const QualStage: React.FC<StageProps> = ({ t }) => {
   const q = prog(t, QUALIFIED_AT, 12);
   return (
     <div style={{ width: COL_W, display: "flex", flexDirection: "column" }}>
-      <div style={{ ...cardStyle, padding: 18, ...rise(t, 0) }}>
+      <div style={{ ...cardStyle, padding: CARD_PAD, ...rise(t, 0) }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
           <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em" }}>Qualification</div>
           <span style={{ display: "inline-grid" }}>
@@ -418,7 +420,7 @@ export const QualStage: React.FC<StageProps> = ({ t }) => {
           <Field label="Appraisal" value="Not yet" t={t} at={16} />
           <Field label="Suburb" value="Brighton East" t={t} at={20} />
         </div>
-        <div style={{ marginTop: 12, background: K.ink, color: "#F6F6F4", borderRadius: 12, padding: "12px 14px" }}>
+        <div style={{ marginTop: 12, background: "linear-gradient(180deg, #1A1A1A 0%, #111111 100%)", color: "#F6F6F4", borderRadius: 20, padding: "14px 16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ width: 32, height: 32, borderRadius: "50%", background: K.tealDark, display: "flex", alignItems: "center", justifyContent: "center", flex: "none", boxShadow: playing ? pulseShadow(t, 5, 40) : "none" }}>
               {playing ? (
@@ -476,12 +478,12 @@ export const QualStage: React.FC<StageProps> = ({ t }) => {
         </div>
       </div>
       <div style={{ display: "flex", justifyContent: "center", opacity: prog(t, QUALIFIED_AT + 12, 8) }}>
-        <span style={{ width: 2, height: 10, background: "#2A2A2A" }} />
+        <span style={{ width: 2, height: 12, background: "rgba(255,255,255,.18)" }} />
       </div>
       <div
         style={{
           ...cardStyle,
-          padding: "10px 14px",
+          padding: "12px 16px",
           display: "flex",
           justifyContent: "space-between",
           gap: 12,
@@ -511,16 +513,16 @@ export const QUAL_DONE = QUALIFIED_AT + 30;
 // 04 Appointment booked: the calendar tile pings on its own, then opens out
 // into the booking card; the week, SMS and delivered tick follow.
 // ---------------------------------------------------------------------------
-export const APPT_H = 266;
+export const APPT_H = 296;
 const TILE_W = 52;
 const TILE_H = 62;
-const TILE_FINAL = { x: 18 + TILE_W / 2, y: 18 + TILE_H / 2 };
+const TILE_FINAL = { x: CARD_PAD + TILE_W / 2, y: CARD_PAD + TILE_H / 2 };
 const TILE_START = { x: COL_W / 2, y: APPT_H / 2 };
 const OPEN_AT = 34;
 const OPEN_LEN = 22;
 
 const CalendarTile: React.FC = () => (
-  <span style={{ display: "block", width: TILE_W, borderRadius: 12, overflow: "hidden", boxShadow: "0 4px 14px rgba(17,17,17,.14)", textAlign: "center", background: K.white }}>
+  <span style={{ display: "block", width: TILE_W, borderRadius: 14, overflow: "hidden", boxShadow: "0 6px 18px rgba(17,17,17,.16)", textAlign: "center", background: K.white }}>
     <span style={{ display: "block", background: K.tealDark, color: "#F6F6F4", fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", padding: "4px 0 3px" }}>Thu</span>
     <span style={{ display: "block", color: K.ink, fontSize: 22, fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1, padding: "6px 0 7px" }}>17</span>
   </span>
@@ -538,7 +540,7 @@ export const ApptStage: React.FC<StageProps> = ({ t }) => {
   const left = (TILE_START.x - hw) * (1 - open);
   const right = (COL_W - TILE_START.x - hw) * (1 - open);
   const bottom = (APPT_H - TILE_START.y - hh) * (1 - open);
-  const radius = 14 + 2 * open;
+  const radius = 16 + (CARD_RADIUS - 16) * open;
   const content = (at: number) => rise(t, OPEN_AT + OPEN_LEN - 6 + at, 12, 8);
   const ping = (at: number) => {
     const p = prog(t, at, 22, Easing.out(Easing.quad));
@@ -562,7 +564,7 @@ export const ApptStage: React.FC<StageProps> = ({ t }) => {
           boxShadow: open >= 1 ? cardStyle.boxShadow : "none",
           clipPath: open >= 1 ? undefined : `inset(${top}px ${right}px ${bottom}px ${left}px round ${radius}px)`,
           opacity: open > 0 ? 1 : 0,
-          padding: 18,
+          padding: CARD_PAD,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -591,7 +593,7 @@ export const ApptStage: React.FC<StageProps> = ({ t }) => {
           })}
         </div>
         <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end", ...rise(t, OPEN_AT + OPEN_LEN + 32, 14, 14) }}>
-          <div style={{ maxWidth: "86%", background: K.tealDark, color: "#F6F6F4", borderRadius: "16px 16px 4px", padding: "10px 13px", fontSize: 13, lineHeight: 1.45 }}>
+          <div style={{ maxWidth: "86%", background: K.tealDark, color: "#F6F6F4", borderRadius: "20px 20px 6px 20px", padding: "11px 15px", fontSize: 13, lineHeight: 1.45 }}>
             Hi Sam, confirming your appraisal on Thursday at 2:30pm with your agent from [Agency]. Reply C to confirm.
           </div>
         </div>
@@ -662,7 +664,7 @@ const CRM_LOGOS: Bubble[] = [
 
 const CONTACT_Y = ORBIT5_H + 18;
 const SYNC_ROWS = ["Contact updated", "Call outcome and notes logged", "Recording and transcript attached", "Appraisal added to agent calendar"];
-export const CRM_H = CONTACT_Y + 196;
+export const CRM_H = CONTACT_Y + 202;
 const CONTACT_AT = 40;
 
 export const CrmStage: React.FC<StageProps> = ({ t }) => {
@@ -727,7 +729,7 @@ export const CrmStage: React.FC<StageProps> = ({ t }) => {
         <OrbitBubble key={b.key} b={b} t={t} enterAt={6 + i * 3} center={C5} />
       ))}
 
-      <div style={{ position: "absolute", left: 0, top: CONTACT_Y, width: COL_W, ...cardStyle, padding: "12px 18px 14px", ...rise(t, CONTACT_AT) }}>
+      <div style={{ position: "absolute", left: 0, top: CONTACT_Y, width: COL_W, ...cardStyle, padding: "16px 22px 16px", ...rise(t, CONTACT_AT) }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
           <span style={{ fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em" }}>Contact: Sam Taylor</span>
           <span style={{ fontSize: 12, fontWeight: 600, color: K.tealDark, display: "inline-flex", alignItems: "center", gap: 4, opacity: prog(t, CONTACT_AT + 10, 8) }}>
@@ -759,7 +761,7 @@ export const CRM_DONE = CONTACT_AT + 18 + 3 * 7 + 20;
 // 06 Follow-up keeps running: the timeline draws down, attempt 1 completes
 // and "next" moves on to attempt 2.
 // ---------------------------------------------------------------------------
-export const FOLLOW_H = 286;
+export const FOLLOW_H = 294;
 const STEPS = [
   { label: "Call · attempt 1", when: "Today", icon: "phone" },
   { label: "Call · attempt 2", when: "Tomorrow", icon: "phone" },
@@ -781,7 +783,7 @@ export const FollowStage: React.FC<StageProps> = ({ t }) => {
   // attempt 1 is current; after, it's done and attempt 2 is current.
   const stateOf = (i: number) => (i === 0 ? 1 - adv : i === 1 ? 1 + (1 - adv) : 2);
   return (
-    <div style={{ width: COL_W, ...cardStyle, padding: 18, ...rise(t, 0) }}>
+    <div style={{ width: COL_W, ...cardStyle, padding: CARD_PAD, ...rise(t, 0) }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <div>
           <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em" }}>Follow-up sequence</div>

@@ -72,7 +72,7 @@ STAGES.forEach((s, i) => {
 const LOGO_ARRIVE = ARRIVE[STAGES.length];
 export const LIFECYCLE_DURATION = LOGO_ARRIVE + 108;
 
-const Connector: React.FC<{ i: number; frame: number; clear: number }> = ({ i, frame, clear }) => {
+const Connector: React.FC<{ i: number; frame: number; focus: number }> = ({ i, frame, focus }) => {
   const start = LINE_START[i];
   const p = interpolate(frame, [start, start + LINE], [0, 1], { ...clamp, easing: easeInOut });
   if (p <= 0) return null;
@@ -91,9 +91,10 @@ const Connector: React.FC<{ i: number; frame: number; clear: number }> = ({ i, f
   if (drain >= 1) return null;
   const tail = y1 + (y2 - y1) * drain;
   return (
-    <g opacity={toLogo ? 1 : clear}>
+    // Each line fades once it has delivered the camera to the next stage.
+    <g opacity={toLogo ? 1 : 1 - interpolate(focus - i, [0.8, 1], [0, 1], clamp)}>
       <line x1={x} y1={tail} x2={x} y2={head} stroke={BRAND.teal} strokeWidth={3} strokeLinecap="round" opacity={toLogo ? 1 : 1 - 0.35 * arrived} />
-      <circle cx={x} cy={y1} r={5} fill={BRAND.teal} opacity={toLogo ? clear : 1} />
+      <circle cx={x} cy={y1} r={5} fill={BRAND.teal} opacity={toLogo ? 1 - interpolate(focus - i, [0.1, 0.6], [0, 1], clamp) : 1} />
       {toLogo ? null : (
         <>
           <circle cx={x} cy={head} r={14} fill={BRAND.teal} opacity={0.25 * (1 - arrived)} />
@@ -117,7 +118,6 @@ const Chain: React.FC<{ scale: number; logoScreenScale: number }> = ({ scale, lo
   // Push in a little on the logo at the end.
   const endZoom = interpolate(focus, [STAGES.length - 1, STAGES.length], [1, logoScreenScale], clamp);
   const s = scale * endZoom;
-  const clear = interpolate(focus, [STAGES.length - 0.8, STAGES.length - 0.1], [1, 0], clamp);
   // Once the logo has built, ease across so it sits centred in frame.
   const settle = interpolate(frame, [LOGO_ARRIVE + 30, LOGO_ARRIVE + 60], [0, 1], { ...clamp, easing: easeInOut });
 
@@ -135,12 +135,14 @@ const Chain: React.FC<{ scale: number; logoScreenScale: number }> = ({ scale, lo
     >
       <svg style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }} width={1} height={1}>
         {STAGES.map((_, i) => (
-          <Connector key={i} i={i} frame={frame} clear={clear} />
+          <Connector key={i} i={i} frame={frame} focus={focus} />
         ))}
       </svg>
       {STAGES.map(({ C }, i) => {
-        // Stages we've moved past dim; all of them clear away for the logo.
-        const past = Math.max(0, Math.min(1, (focus - i - 0.3) / 0.7));
+        // Once the camera starts moving on, the stage we're leaving fades out,
+        // drifting up and settling back slightly as it goes.
+        const past = interpolate(focus - i, [0.6, 1], [0, 1], { ...clamp, easing: easeInOut });
+        if (past >= 1) return null;
         const t = frame - ARRIVE[i];
         if (t < 0) return null;
         return (
@@ -151,8 +153,10 @@ const Chain: React.FC<{ scale: number; logoScreenScale: number }> = ({ scale, lo
               left: 0,
               top: TOPS[i],
               width: COL_W,
-              filter: `brightness(${1 - 0.6 * past})`,
-              opacity: clear,
+              opacity: 1 - past,
+              translate: `0 ${-40 * past}px`,
+              scale: String(1 - 0.05 * past),
+              filter: past > 0 ? `blur(${6 * past}px)` : undefined,
             }}
           >
             <C t={t} />

@@ -52,11 +52,17 @@ export const pulseShadow = (t: number, size = 6, periodF = 48) => {
   return `0 0 0 ${size * p}px rgba(14,138,125,${0.45 * (1 - p)})`;
 };
 
+// Apple-like surface: generous continuous-looking corners, a soft layered
+// shadow, a faint top highlight and a hairline edge so it reads as a solid
+// object on the dark background.
+export const CARD_RADIUS = 28;
+export const CARD_PAD = 22;
 export const cardStyle: React.CSSProperties = {
-  background: K.white,
+  background: "linear-gradient(180deg, #FFFFFF 0%, #FAFAF8 100%)",
   color: K.ink,
-  borderRadius: 16,
-  boxShadow: "0 10px 30px rgba(0,0,0,.25)",
+  borderRadius: CARD_RADIUS,
+  boxShadow:
+    "inset 0 1px 0 rgba(255,255,255,.9), 0 0 0 1px rgba(255,255,255,.06), 0 2px 6px rgba(0,0,0,.18), 0 18px 48px rgba(0,0,0,.45)",
   boxSizing: "border-box",
 };
 
