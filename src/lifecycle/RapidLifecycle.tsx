@@ -82,10 +82,17 @@ const Connector: React.FC<{ i: number; frame: number; clear: number }> = ({ i, f
   const y2 = toLogo ? TOPS[i + 1] + 2 : TOPS[i + 1] - 12;
   const head = y1 + (y2 - y1) * p;
   const arrived = interpolate(frame, [start + LINE, start + LINE + 12], [0, 1], clamp);
+  // Once the last line has joined the slash, it drains down into it so only
+  // the logo is left.
+  const drain = toLogo
+    ? interpolate(frame, [LOGO_ARRIVE + 14, LOGO_ARRIVE + 32], [0, 1], { ...clamp, easing: easeInOut })
+    : 0;
+  if (drain >= 1) return null;
+  const tail = y1 + (y2 - y1) * drain;
   return (
     <g opacity={toLogo ? 1 : clear}>
-      <line x1={x} y1={y1} x2={x} y2={head} stroke={BRAND.teal} strokeWidth={3} strokeLinecap="round" opacity={1 - 0.35 * arrived} />
-      <circle cx={x} cy={y1} r={5} fill={BRAND.teal} />
+      <line x1={x} y1={tail} x2={x} y2={head} stroke={BRAND.teal} strokeWidth={3} strokeLinecap="round" opacity={toLogo ? 1 : 1 - 0.35 * arrived} />
+      <circle cx={x} cy={y1} r={5} fill={BRAND.teal} opacity={toLogo ? clear : 1} />
       {toLogo ? null : (
         <>
           <circle cx={x} cy={head} r={14} fill={BRAND.teal} opacity={0.25 * (1 - arrived)} />
