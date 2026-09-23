@@ -19,7 +19,6 @@ loadFont({
 });
 
 const C = {
-  page: "#F4F4F1",
   card: "#0A4F48",
   ink: "#F6F6F4",
   mint: "#A9EFE5",
@@ -247,22 +246,19 @@ export const RapidClock: React.FC = () => {
   return (
     <AbsoluteFill
       style={{
-        background: C.page,
+        background: C.card,
         fontFamily,
         color: C.ink,
         alignItems: "center",
         justifyContent: "center",
       }}
     >
-      {/* Card is laid out at the HTML's native 1040px width, then scaled up for 1080p. */}
+      {/* Content is laid out at the HTML's native 1040px width, then scaled up for 1080p. */}
       <div
         style={{
           width: 1040,
-          background: C.card,
-          borderRadius: 20,
           padding: 36,
           boxSizing: "border-box",
-          boxShadow: "0 30px 80px rgba(6,40,36,.45)",
           opacity: interpolate(frame, [0, 15], [0, 1], clamp),
           scale: String(
             1.6 * interpolate(frame, [0, 24], [0.96, 1], { ...clamp, easing: easeOut }),
