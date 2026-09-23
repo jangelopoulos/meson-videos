@@ -2,30 +2,13 @@ import React from "react";
 import {
   AbsoluteFill,
   Easing,
-  Img,
   interpolate,
-  staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { loadFont } from "@remotion/fonts";
 
-// Self-hosted fonts so renders don't depend on Google Fonts.
-const fontFamily = "Instrument Sans";
-loadFont({
-  family: fontFamily,
-  url: staticFile("fonts/InstrumentSans-latin.woff2"),
-  weight: "400 600",
-  format: "woff2",
-});
-const logoFont = "Archivo";
-loadFont({
-  family: logoFont,
-  url: staticFile("fonts/Archivo-SemiExpanded-600-latin.woff2"),
-  weight: "600",
-  stretch: "112.5%",
-  format: "woff2",
-});
+import { fontFamily } from "./brand";
+import { MesonRapidLogo } from "./MesonRapidLogo";
 
 const C = {
   card: "#0A4F48",
@@ -300,75 +283,6 @@ const Stat: React.FC<{ stat: (typeof STATS)[number]; delay: number }> = ({
   );
 };
 
-// Logo builds in: wordmark fades up, slash draws upward, then RAPID rises along the slash.
-const LOGO_START = 66;
-const SLASH_TAN = Math.tan((18 * Math.PI) / 180);
-
-const MesonRapidLogo: React.FC = () => {
-  const frame = useCurrentFrame();
-  const f = frame - LOGO_START;
-  const rise = interpolate(f, [22, 52], [1, 0], {
-    ...clamp,
-    easing: Easing.out(Easing.cubic),
-  });
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-      <Img
-        src={staticFile("logo/meson-wordmark-white.png")}
-        alt="Meson"
-        style={{
-          height: 40,
-          width: "auto",
-          display: "block",
-          opacity: interpolate(f, [0, 14], [0, 1], clamp),
-          translate: `0 ${interpolate(f, [0, 20], [10, 0], { ...clamp, easing: easeOut })}px`,
-        }}
-      />
-      <span
-        style={{
-          width: 3,
-          height: 52,
-          background: C.teal,
-          transform: "skewX(-18deg)",
-          borderRadius: 2,
-          flex: "none",
-          // Draw the slash upward from its base.
-          clipPath: `inset(${interpolate(f, [10, 26], [100, 0], {
-            ...clamp,
-            easing: easeOut,
-          })}% 0 0 0)`,
-        }}
-      />
-      {/* Clip box so RAPID emerges from the slash rather than floating in */}
-      <span
-        style={{
-          display: "block",
-          overflow: "hidden",
-          height: 52,
-          alignContent: "center",
-        }}
-      >
-        <span
-          style={{
-            display: "block",
-            fontFamily: logoFont,
-            fontStretch: "112.5%",
-            fontWeight: 600,
-            fontSize: 22,
-            lineHeight: 1.05,
-            letterSpacing: "0.02em",
-            textTransform: "uppercase",
-            color: C.ink,
-            // Travel along the slash angle: up and slightly right.
-            translate: `${-40 * SLASH_TAN * rise}px ${40 * rise}px`,
-          }}
-        >
-          Rapid
-        </span>
-      </span>
-    </div>
-  );
-};
 
 // easeInOutQuad, same curve as the HTML's requestAnimationFrame loop.
 const useMinutes = () => {
@@ -466,6 +380,8 @@ const StatsGrid: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
   </div>
 );
 
+const LOGO_START = 66;
+
 const Logo: React.FC<{ bottom: number; scale: number }> = ({ bottom, scale }) => (
   <div
     style={{
@@ -478,7 +394,7 @@ const Logo: React.FC<{ bottom: number; scale: number }> = ({ bottom, scale }) =>
       scale: String(scale),
     }}
   >
-    <MesonRapidLogo />
+    <MesonRapidLogo start={LOGO_START} />
   </div>
 );
 
