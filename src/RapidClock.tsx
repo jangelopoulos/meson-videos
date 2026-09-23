@@ -370,21 +370,26 @@ const MesonRapidLogo: React.FC = () => {
   );
 };
 
-export const RapidClock: React.FC = () => {
+// easeInOutQuad, same curve as the HTML's requestAnimationFrame loop.
+const useMinutes = () => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
-
-  // easeInOutQuad, same curve as the HTML's requestAnimationFrame loop.
-  const minutes = interpolate(
+  const { fps } = useVideoConfig();
+  return interpolate(
     frame,
     [SWEEP_START, SWEEP_START + SWEEP_SECONDS * fps],
     [0, 60],
     { ...clamp, easing: Easing.inOut(Easing.quad) },
   );
+};
 
-  // Slow drift of the background glow across the whole video.
+// Layered teal gradient with a glow that drifts slowly across the whole video.
+const Backdrop: React.FC<{
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}> = ({ children, style }) => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
   const glowX = interpolate(frame, [0, durationInFrames], [18, 30]);
-
   return (
     <AbsoluteFill
       style={{
@@ -393,24 +398,103 @@ export const RapidClock: React.FC = () => {
         color: C.ink,
         alignItems: "center",
         justifyContent: "center",
-        // Lift the main content to leave room for the logo at the bottom.
-        paddingBottom: 110,
+        ...style,
       }}
     >
+      {children}
+    </AbsoluteFill>
+  );
+};
+
+// Fade, lift and settle the main content block, applied on top of its layout scale.
+const useEntrance = (scale: number): React.CSSProperties => {
+  const frame = useCurrentFrame();
+  return {
+    opacity: interpolate(frame, [0, 15], [0, 1], clamp),
+    scale: String(
+      scale * interpolate(frame, [0, 24], [0.96, 1], { ...clamp, easing: easeOut }),
+    ),
+    translate: `0 ${interpolate(frame, [0, 24], [40, 0], {
+      ...clamp,
+      easing: easeOut,
+    })}px`,
+  };
+};
+
+const Heading: React.FC<{ align?: "left" | "center" }> = ({ align = "left" }) => {
+  const frame = useCurrentFrame();
+  return (
+    <div style={{ textAlign: align }}>
+      <h2
+        style={{
+          fontWeight: 600,
+          fontSize: 44,
+          letterSpacing: "-0.025em",
+          lineHeight: 1.05,
+          margin: 0,
+          opacity: interpolate(frame, [8, 24], [0, 1], clamp),
+        }}
+      >
+        Speed to Lead
+      </h2>
+      <p
+        style={{
+          margin: "10px 0 0",
+          fontSize: 15,
+          color: C.mintSoft,
+          opacity: interpolate(frame, [14, 30], [0, 1], clamp),
+        }}
+      >
+        Your odds of losing them, the longer nobody calls.
+      </p>
+    </div>
+  );
+};
+
+const StatsGrid: React.FC<{ style?: React.CSSProperties }> = ({ style }) => (
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+      gap: "26px 24px",
+      ...style,
+    }}
+  >
+    {STATS.map((s, i) => (
+      <Stat key={s.value} stat={s} delay={30 + i * 8} />
+    ))}
+  </div>
+);
+
+const Logo: React.FC<{ bottom: number; scale: number }> = ({ bottom, scale }) => (
+  <div
+    style={{
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom,
+      display: "flex",
+      justifyContent: "center",
+      scale: String(scale),
+    }}
+  >
+    <MesonRapidLogo />
+  </div>
+);
+
+// 1920x1080: dial on the left, heading and stats on the right.
+export const RapidClock: React.FC = () => {
+  const minutes = useMinutes();
+  const entrance = useEntrance(CONTENT_SCALE);
+  return (
+    // Lift the main content to leave room for the logo at the bottom.
+    <Backdrop style={{ paddingBottom: 110 }}>
       <div
         style={{
           width: 1040,
           padding: 36,
           boxSizing: "border-box",
-          opacity: interpolate(frame, [0, 15], [0, 1], clamp),
-          scale: String(
-            CONTENT_SCALE *
-              interpolate(frame, [0, 24], [0.96, 1], { ...clamp, easing: easeOut }),
-          ),
-          translate: `0 ${interpolate(frame, [0, 24], [40, 0], {
-            ...clamp,
-            easing: easeOut,
-          })}px`,
+          ...entrance,
         }}
       >
         <div
@@ -423,56 +507,43 @@ export const RapidClock: React.FC = () => {
         >
           <Dial minutes={minutes} />
           <div>
-            <h2
-              style={{
-                fontWeight: 600,
-                fontSize: 44,
-                letterSpacing: "-0.025em",
-                lineHeight: 1.05,
-                margin: 0,
-                opacity: interpolate(frame, [8, 24], [0, 1], clamp),
-              }}
-            >
-              Speed to Lead
-            </h2>
-            <p
-              style={{
-                margin: "10px 0 0",
-                fontSize: 15,
-                color: C.mintSoft,
-                opacity: interpolate(frame, [14, 30], [0, 1], clamp),
-              }}
-            >
-              Your odds of losing them, the longer nobody calls.
-            </p>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                gap: "26px 24px",
-                marginTop: 26,
-              }}
-            >
-              {STATS.map((s, i) => (
-                <Stat key={s.value} stat={s} delay={30 + i * 8} />
-              ))}
-            </div>
+            <Heading />
+            <StatsGrid style={{ marginTop: 26 }} />
           </div>
         </div>
       </div>
+      <Logo bottom={96} scale={CONTENT_SCALE} />
+    </Backdrop>
+  );
+};
+
+// Vertical layout is built at 480px wide and scaled to 840px, leaving 120px
+// side margins clear of the app buttons TikTok/Reels overlay on the right.
+const VERTICAL_SCALE = 1.75;
+
+// 1080x1920: heading, dial, stats stacked; logo at the bottom. Content keeps
+// clear of the top and bottom bands that social apps cover with their UI.
+export const RapidClockVertical: React.FC = () => {
+  const minutes = useMinutes();
+  const entrance = useEntrance(VERTICAL_SCALE);
+  return (
+    <Backdrop style={{ paddingBottom: 164 }}>
       <div
         style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 96,
+          width: 480,
           display: "flex",
-          justifyContent: "center",
-          scale: String(CONTENT_SCALE),
+          flexDirection: "column",
+          alignItems: "center",
+          ...entrance,
         }}
       >
-        <MesonRapidLogo />
+        <Heading align="center" />
+        <div style={{ marginTop: 28 }}>
+          <Dial minutes={minutes} />
+        </div>
+        <StatsGrid style={{ marginTop: 32, width: "100%" }} />
       </div>
-    </AbsoluteFill>
+      <Logo bottom={230} scale={1.6} />
+    </Backdrop>
   );
 };
