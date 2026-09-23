@@ -181,27 +181,35 @@ const Chain: React.FC<{ scale: number; logoScreenScale: number }> = ({ scale, lo
   );
 };
 
-// ElevenLabs voiceover (voice: "Cass", British female), one line per stage.
-// Clips were loudness-matched after download (per-clip gain, peaks kept
-// under -1dBFS) so they sit consistently over the music.
-// `durS` is each clip's length in seconds, used to duck the music under it.
+// ElevenLabs voiceover, one line per stage. Two voices are kept in
+// public/audio; pick one with VOICE_NAME. Clips were loudness-matched after
+// download (per-clip gain, peaks kept under -1dBFS) so they sit consistently
+// over the music. `durS` is each clip's length, used to duck the music.
 const FPS = 30;
-const VOICE = [
-  { file: "vo-1-enquiry.mp3", at: ARRIVE[0] + 8, durS: 2.28 },
-  { file: "vo-2-call.mp3", at: ARRIVE[1] + 4, durS: 2.23 },
-  { file: "vo-3-qualify.mp3", at: ARRIVE[2] + 4, durS: 3.34 },
-  { file: "vo-4-appointment.mp3", at: ARRIVE[3] + 4, durS: 2.97 },
-  { file: "vo-5-crm.mp3", at: ARRIVE[4] + 4, durS: 2.41 },
-  { file: "vo-6-followup.mp3", at: ARRIVE[5] + 4, durS: 1.72 },
+const VOICES = {
+  // "Katherine - Calm Luxury Narrator" (NtS6nEHDYMQC9QczMQuq)
+  katherine: [2.65, 2.18, 3.81, 3.16, 2.55, 1.86, 3.81],
+  // "Cass - Warm and Energetic British Woman" (ITRml9f5K7moz24wRnmV)
+  cass: [2.28, 2.23, 3.34, 2.97, 2.41, 1.72, 3.3],
+};
+const VOICE_NAME: keyof typeof VOICES = "katherine";
+const LINES = [
+  { file: "vo-1-enquiry.mp3", at: ARRIVE[0] + 8 },
+  { file: "vo-2-call.mp3", at: ARRIVE[1] + 4 },
+  { file: "vo-3-qualify.mp3", at: ARRIVE[2] + 4 },
+  { file: "vo-4-appointment.mp3", at: ARRIVE[3] + 4 },
+  { file: "vo-5-crm.mp3", at: ARRIVE[4] + 4 },
+  { file: "vo-6-followup.mp3", at: ARRIVE[5] + 4 },
   // Starts as the last line heads for the logo, so "Meson Rapid" lands on it.
-  { file: "vo-7-logo.mp3", at: LINE_START[5] + 2, durS: 3.3 },
+  { file: "vo-7-logo.mp3", at: LINE_START[5] + 2 },
 ];
+const VOICE = LINES.map((l, i) => ({ ...l, durS: VOICES[VOICE_NAME][i] }));
 
 const Voiceover: React.FC = () => (
   <>
     {VOICE.map((v) => (
       <Sequence key={v.file} from={v.at} durationInFrames={Math.ceil(v.durS * FPS) + 6} layout="none">
-        <Audio src={staticFile(`audio/vo/${v.file}`)} />
+        <Audio src={staticFile(`audio/vo-${VOICE_NAME}/${v.file}`)} />
       </Sequence>
     ))}
   </>
