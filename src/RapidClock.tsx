@@ -2,6 +2,7 @@ import React from "react";
 import {
   AbsoluteFill,
   Easing,
+  Img,
   interpolate,
   staticFile,
   useCurrentFrame,
@@ -9,12 +10,20 @@ import {
 } from "remotion";
 import { loadFont } from "@remotion/fonts";
 
-// Self-hosted variable font (weights 400–600) so renders don't depend on Google Fonts.
+// Self-hosted fonts so renders don't depend on Google Fonts.
 const fontFamily = "Instrument Sans";
 loadFont({
   family: fontFamily,
   url: staticFile("fonts/InstrumentSans-latin.woff2"),
   weight: "400 600",
+  format: "woff2",
+});
+const logoFont = "Archivo";
+loadFont({
+  family: logoFont,
+  url: staticFile("fonts/Archivo-SemiExpanded-600-latin.woff2"),
+  weight: "600",
+  stretch: "112.5%",
   format: "woff2",
 });
 
@@ -30,6 +39,10 @@ const C = {
 // Seconds the dial takes to sweep 0 -> 60 minutes (matches the HTML default).
 const SWEEP_SECONDS = 6;
 const SWEEP_START = 30;
+
+// Content is laid out at the HTML's native 1040px width, then scaled for 1080p.
+// Kept below full width to leave generous side margins for mobile crops.
+const CONTENT_SCALE = 1.45;
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const easeOut = Easing.bezier(0.16, 1, 0.3, 1);
@@ -55,6 +68,35 @@ const Arrow: React.FC<{ size: number; color: string; rotate?: number }> = ({
   </svg>
 );
 
+const DIAL = 380;
+const CENTER = DIAL / 2;
+const RING_WIDTH = 36;
+const RING_R = CENTER - RING_WIDTH / 2 - 2;
+const CIRCUMFERENCE = 2 * Math.PI * RING_R;
+
+// Arc along the ring from `from` to `to` degrees (0 = 12 o'clock), with rounded ends.
+const Arc: React.FC<{ from: number; to: number; color: string }> = ({
+  from,
+  to,
+  color,
+}) => {
+  if (to <= from) return null;
+  return (
+    <circle
+      cx={CENTER}
+      cy={CENTER}
+      r={RING_R}
+      fill="none"
+      stroke={color}
+      strokeWidth={RING_WIDTH}
+      strokeLinecap="round"
+      strokeDasharray={`${((to - from) / 360) * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+      strokeDashoffset={(-from / 360) * CIRCUMFERENCE}
+      transform={`rotate(-90 ${CENTER} ${CENTER})`}
+    />
+  );
+};
+
 const Dial: React.FC<{ minutes: number }> = ({ minutes }) => {
   const sweep = minutes * 6;
   const green = Math.min(sweep, 60);
@@ -70,70 +112,96 @@ const Dial: React.FC<{ minutes: number }> = ({ minutes }) => {
         ? { word: "Poor", color: "#FFD9A8", bg: "rgba(255,180,100,.18)", rot: 90 }
         : { word: "Odds falling", color: C.coralIcon, bg: "rgba(232,112,95,.22)", rot: 0 };
 
+  const outer = CENTER - 2;
+  const handAngle = ((sweep - 90) * Math.PI) / 180;
+
   return (
-    <div
-      style={{
-        position: "relative",
-        width: 320,
-        height: 320,
-        borderRadius: "50%",
-        background: `conic-gradient(${C.teal} 0 ${green}deg, ${redc} ${green}deg ${sweep}deg, rgba(255,255,255,.14) ${sweep}deg 360deg)`,
-      }}
-    >
-      {Array.from({ length: 60 }, (_, i) => {
-        const major = i % 5 === 0;
-        return (
-          <span
-            key={i}
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              width: major ? 2 : 1,
-              height: major ? 14 : 7,
-              background: i < 10 ? C.mint : "rgba(255,255,255,.4)",
-              transform: `translate(-50%,-152px) rotate(${i * 6}deg)`,
-              transformOrigin: "50% 152px",
-            }}
-          />
-        );
-      })}
-      {/* Hand */}
-      <span
+    <div style={{ position: "relative", width: DIAL, height: DIAL }}>
+      <svg
+        width={DIAL}
+        height={DIAL}
         style={{
           position: "absolute",
-          left: "50%",
-          top: "50%",
-          width: 2,
-          height: 140,
-          background: `linear-gradient(to top, transparent 0 40%, ${C.mint} 40%)`,
-          transform: `translate(-50%,-100%) rotate(${sweep}deg)`,
-          transformOrigin: "50% 100%",
+          inset: 0,
+          overflow: "visible",
+          filter: "drop-shadow(0 14px 30px rgba(3,30,27,.45))",
         }}
-      />
+      >
+        {/* Track */}
+        <circle
+          cx={CENTER}
+          cy={CENTER}
+          r={RING_R}
+          fill="none"
+          stroke="rgba(255,255,255,.12)"
+          strokeWidth={RING_WIDTH}
+        />
+        {/* Red drawn first so the teal window's rounded ends sit on top of it */}
+        <Arc from={60} to={sweep} color={redc} />
+        <Arc from={0} to={green} color={C.teal} />
+        {Array.from({ length: 60 }, (_, i) => {
+          const major = i % 5 === 0;
+          const a = ((i * 6 - 90) * Math.PI) / 180;
+          const r1 = outer - 8;
+          const r2 = r1 - (major ? 12 : 6);
+          return (
+            <line
+              key={i}
+              x1={CENTER + r1 * Math.cos(a)}
+              y1={CENTER + r1 * Math.sin(a)}
+              x2={CENTER + r2 * Math.cos(a)}
+              y2={CENTER + r2 * Math.sin(a)}
+              stroke={i < 10 ? C.mint : "rgba(255,255,255,.4)"}
+              strokeWidth={major ? 2 : 1}
+              strokeLinecap="round"
+            />
+          );
+        })}
+        {/* Hand, visible across the ring */}
+        <line
+          x1={CENTER + (RING_R - RING_WIDTH / 2 - 4) * Math.cos(handAngle)}
+          y1={CENTER + (RING_R - RING_WIDTH / 2 - 4) * Math.sin(handAngle)}
+          x2={CENTER + (outer + 2) * Math.cos(handAngle)}
+          y2={CENTER + (outer + 2) * Math.sin(handAngle)}
+          stroke={C.mint}
+          strokeWidth={3}
+          strokeLinecap="round"
+        />
+      </svg>
       <div
         style={{
           position: "absolute",
-          inset: 44,
+          inset: RING_WIDTH + 12,
           borderRadius: "50%",
-          background: C.card,
+          background: "radial-gradient(circle at 50% 28%, #0E5D55 0%, #083F3A 100%)",
+          boxShadow:
+            "inset 0 2px 0 rgba(255,255,255,.06), inset 0 -10px 24px rgba(0,0,0,.18)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           textAlign: "center",
+          padding: "0 28px",
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: C.mint }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: C.mint,
+            lineHeight: 1.2,
+            maxWidth: "16ch",
+          }}
+        >
           {minutes <= 10 ? "Inside the 10-minute window" : "Time since enquiry"}
         </span>
         <span
           style={{
-            fontSize: 64,
+            fontSize: 58,
             fontWeight: 600,
             letterSpacing: "-0.04em",
             lineHeight: 1,
-            marginTop: 6,
+            marginTop: 8,
             fontVariantNumeric: "tabular-nums",
           }}
         >
@@ -158,10 +226,11 @@ const Dial: React.FC<{ minutes: number }> = ({ minutes }) => {
         </span>
         <span
           style={{
-            fontSize: 14,
+            fontSize: 13,
             color: C.mintSoft,
-            marginTop: 6,
-            maxWidth: "18ch",
+            marginTop: 8,
+            maxWidth: "20ch",
+            lineHeight: 1.3,
           }}
         >
           odds of reaching them fall 10× across the first hour
@@ -231,9 +300,43 @@ const Stat: React.FC<{ stat: (typeof STATS)[number]; delay: number }> = ({
   );
 };
 
+const MesonRapidLogo: React.FC = () => (
+  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+    <Img
+      src={staticFile("logo/meson-wordmark-white.png")}
+      alt="Meson"
+      style={{ height: 40, width: "auto", display: "block" }}
+    />
+    <span
+      style={{
+        width: 3,
+        height: 52,
+        background: C.teal,
+        transform: "skewX(-18deg)",
+        borderRadius: 2,
+        flex: "none",
+      }}
+    />
+    <span
+      style={{
+        fontFamily: logoFont,
+        fontStretch: "112.5%",
+        fontWeight: 600,
+        fontSize: 22,
+        lineHeight: 1.05,
+        letterSpacing: "0.02em",
+        textTransform: "uppercase",
+        color: C.ink,
+      }}
+    >
+      Rapid
+    </span>
+  </div>
+);
+
 export const RapidClock: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, durationInFrames } = useVideoConfig();
 
   // easeInOutQuad, same curve as the HTML's requestAnimationFrame loop.
   const minutes = interpolate(
@@ -243,17 +346,19 @@ export const RapidClock: React.FC = () => {
     { ...clamp, easing: Easing.inOut(Easing.quad) },
   );
 
+  // Slow drift of the background glow across the whole video.
+  const glowX = interpolate(frame, [0, durationInFrames], [18, 30]);
+
   return (
     <AbsoluteFill
       style={{
-        background: C.card,
+        background: `radial-gradient(ellipse 70% 80% at ${glowX}% 30%, rgba(20,184,166,.28) 0%, rgba(20,184,166,0) 60%), radial-gradient(ellipse 60% 70% at 90% 100%, rgba(3,30,27,.55) 0%, rgba(3,30,27,0) 70%), linear-gradient(150deg, #0D5C54 0%, ${C.card} 45%, #06332E 100%)`,
         fontFamily,
         color: C.ink,
         alignItems: "center",
         justifyContent: "center",
       }}
     >
-      {/* Content is laid out at the HTML's native 1040px width, then scaled up for 1080p. */}
       <div
         style={{
           width: 1040,
@@ -261,7 +366,8 @@ export const RapidClock: React.FC = () => {
           boxSizing: "border-box",
           opacity: interpolate(frame, [0, 15], [0, 1], clamp),
           scale: String(
-            1.6 * interpolate(frame, [0, 24], [0.96, 1], { ...clamp, easing: easeOut }),
+            CONTENT_SCALE *
+              interpolate(frame, [0, 24], [0.96, 1], { ...clamp, easing: easeOut }),
           ),
           translate: `0 ${interpolate(frame, [0, 24], [40, 0], {
             ...clamp,
@@ -272,26 +378,24 @@ export const RapidClock: React.FC = () => {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 48,
+            gridTemplateColumns: "auto 1fr",
+            gap: 64,
             alignItems: "center",
           }}
         >
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <Dial minutes={minutes} />
-          </div>
+          <Dial minutes={minutes} />
           <div>
             <h2
               style={{
                 fontWeight: 600,
-                fontSize: 36,
+                fontSize: 44,
                 letterSpacing: "-0.025em",
                 lineHeight: 1.05,
                 margin: 0,
                 opacity: interpolate(frame, [8, 24], [0, 1], clamp),
               }}
             >
-              What happens when nobody calls back?
+              Speed to Lead
             </h2>
             <p
               style={{
@@ -307,8 +411,8 @@ export const RapidClock: React.FC = () => {
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                gap: "22px 24px",
-                marginTop: 22,
+                gap: "26px 24px",
+                marginTop: 26,
               }}
             >
               {STATS.map((s, i) => (
@@ -319,16 +423,17 @@ export const RapidClock: React.FC = () => {
         </div>
         <div
           style={{
-            marginTop: 22,
-            paddingTop: 18,
-            borderTop: "1px solid rgba(255,255,255,.2)",
+            display: "flex",
+            justifyContent: "center",
+            marginTop: 48,
             opacity: interpolate(frame, [60, 80], [0, 1], clamp),
+            translate: `0 ${interpolate(frame, [60, 84], [12, 0], {
+              ...clamp,
+              easing: easeOut,
+            })}px`,
           }}
         >
-          <p style={{ margin: 0, fontSize: 13, color: C.mint, maxWidth: "60ch" }}>
-            Teal wedge marks Meson Rapid's 10-minute window, our commitment, not a
-            study result. Red is the hour running out.
-          </p>
+          <MesonRapidLogo />
         </div>
       </div>
     </AbsoluteFill>
