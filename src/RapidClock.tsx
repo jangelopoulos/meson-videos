@@ -300,39 +300,75 @@ const Stat: React.FC<{ stat: (typeof STATS)[number]; delay: number }> = ({
   );
 };
 
-const MesonRapidLogo: React.FC = () => (
-  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-    <Img
-      src={staticFile("logo/meson-wordmark-white.png")}
-      alt="Meson"
-      style={{ height: 40, width: "auto", display: "block" }}
-    />
-    <span
-      style={{
-        width: 3,
-        height: 52,
-        background: C.teal,
-        transform: "skewX(-18deg)",
-        borderRadius: 2,
-        flex: "none",
-      }}
-    />
-    <span
-      style={{
-        fontFamily: logoFont,
-        fontStretch: "112.5%",
-        fontWeight: 600,
-        fontSize: 22,
-        lineHeight: 1.05,
-        letterSpacing: "0.02em",
-        textTransform: "uppercase",
-        color: C.ink,
-      }}
-    >
-      Rapid
-    </span>
-  </div>
-);
+// Logo builds in: wordmark fades up, slash draws upward, then RAPID rises along the slash.
+const LOGO_START = 66;
+const SLASH_TAN = Math.tan((18 * Math.PI) / 180);
+
+const MesonRapidLogo: React.FC = () => {
+  const frame = useCurrentFrame();
+  const f = frame - LOGO_START;
+  const rise = interpolate(f, [22, 52], [1, 0], {
+    ...clamp,
+    easing: Easing.out(Easing.cubic),
+  });
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <Img
+        src={staticFile("logo/meson-wordmark-white.png")}
+        alt="Meson"
+        style={{
+          height: 40,
+          width: "auto",
+          display: "block",
+          opacity: interpolate(f, [0, 14], [0, 1], clamp),
+          translate: `0 ${interpolate(f, [0, 20], [10, 0], { ...clamp, easing: easeOut })}px`,
+        }}
+      />
+      <span
+        style={{
+          width: 3,
+          height: 52,
+          background: C.teal,
+          transform: "skewX(-18deg)",
+          borderRadius: 2,
+          flex: "none",
+          // Draw the slash upward from its base.
+          clipPath: `inset(${interpolate(f, [10, 26], [100, 0], {
+            ...clamp,
+            easing: easeOut,
+          })}% 0 0 0)`,
+        }}
+      />
+      {/* Clip box so RAPID emerges from the slash rather than floating in */}
+      <span
+        style={{
+          display: "block",
+          overflow: "hidden",
+          height: 52,
+          alignContent: "center",
+        }}
+      >
+        <span
+          style={{
+            display: "block",
+            fontFamily: logoFont,
+            fontStretch: "112.5%",
+            fontWeight: 600,
+            fontSize: 22,
+            lineHeight: 1.05,
+            letterSpacing: "0.02em",
+            textTransform: "uppercase",
+            color: C.ink,
+            // Travel along the slash angle: up and slightly right.
+            translate: `${-40 * SLASH_TAN * rise}px ${40 * rise}px`,
+          }}
+        >
+          Rapid
+        </span>
+      </span>
+    </div>
+  );
+};
 
 export const RapidClock: React.FC = () => {
   const frame = useCurrentFrame();
@@ -357,6 +393,8 @@ export const RapidClock: React.FC = () => {
         color: C.ink,
         alignItems: "center",
         justifyContent: "center",
+        // Lift the main content to leave room for the logo at the bottom.
+        paddingBottom: 110,
       }}
     >
       <div
@@ -421,20 +459,19 @@ export const RapidClock: React.FC = () => {
             </div>
           </div>
         </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: 48,
-            opacity: interpolate(frame, [60, 80], [0, 1], clamp),
-            translate: `0 ${interpolate(frame, [60, 84], [12, 0], {
-              ...clamp,
-              easing: easeOut,
-            })}px`,
-          }}
-        >
-          <MesonRapidLogo />
-        </div>
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 96,
+          display: "flex",
+          justifyContent: "center",
+          scale: String(CONTENT_SCALE),
+        }}
+      >
+        <MesonRapidLogo />
       </div>
     </AbsoluteFill>
   );
