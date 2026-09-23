@@ -1,6 +1,6 @@
 import React from "react";
 import { Audio } from "@remotion/media";
-import { AbsoluteFill, interpolate, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Sequence, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { BRAND, fontFamily } from "../brand";
 import { LOGO_SLASH_CENTER_X, MesonRapidLogo } from "../MesonRapidLogo";
 import {
@@ -70,7 +70,7 @@ STAGES.forEach((s, i) => {
   ARRIVE.push(LINE_START[i] + LINE);
 });
 const LOGO_ARRIVE = ARRIVE[STAGES.length];
-export const LIFECYCLE_DURATION = LOGO_ARRIVE + 96;
+export const LIFECYCLE_DURATION = LOGO_ARRIVE + 108;
 
 const Connector: React.FC<{ i: number; frame: number; clear: number }> = ({ i, frame, clear }) => {
   const start = LINE_START[i];
@@ -177,18 +177,56 @@ const Chain: React.FC<{ scale: number; logoScreenScale: number }> = ({ scale, lo
   );
 };
 
+// ElevenLabs voiceover (voice: "Cass", British female), one line per stage.
+// Clips were loudness-matched after download (per-clip gain, peaks kept
+// under -1dBFS) so they sit consistently over the music.
+// `durS` is each clip's length in seconds, used to duck the music under it.
+const FPS = 30;
+const VOICE = [
+  { file: "vo-1-enquiry.mp3", at: ARRIVE[0] + 8, durS: 2.28 },
+  { file: "vo-2-call.mp3", at: ARRIVE[1] + 4, durS: 2.23 },
+  { file: "vo-3-qualify.mp3", at: ARRIVE[2] + 4, durS: 3.34 },
+  { file: "vo-4-appointment.mp3", at: ARRIVE[3] + 4, durS: 2.97 },
+  { file: "vo-5-crm.mp3", at: ARRIVE[4] + 4, durS: 2.41 },
+  { file: "vo-6-followup.mp3", at: ARRIVE[5] + 4, durS: 1.72 },
+  // Starts as the last line heads for the logo, so "Meson Rapid" lands on it.
+  { file: "vo-7-logo.mp3", at: LINE_START[5] + 2, durS: 3.3 },
+];
+
+const Voiceover: React.FC = () => (
+  <>
+    {VOICE.map((v) => (
+      <Sequence key={v.file} from={v.at} durationInFrames={Math.ceil(v.durS * FPS) + 6} layout="none">
+        <Audio src={staticFile(`audio/vo/${v.file}`)} />
+      </Sequence>
+    ))}
+  </>
+);
+
 // ElevenLabs Music tracks (30s, generated for this video). Switch between the
 // two variations here.
 const MUSIC = "audio/lifecycle-music-a.mp3";
-const MUSIC_VOLUME = 0.8;
+const MUSIC_VOLUME = 0.6;
+const MUSIC_DUCKED = 0.16; // under the voiceover
+
+// 1 while any voice line is playing (with short ramps either side).
+const voiceActive = (f: number) =>
+  Math.max(
+    0,
+    ...VOICE.map((v) => {
+      const end = v.at + v.durS * FPS;
+      return interpolate(f, [v.at - 6, v.at, end, end + 10], [0, 1, 1, 0], clamp);
+    }),
+  );
 
 const Music: React.FC = () => (
   <Audio
     src={staticFile(MUSIC)}
-    // Short fade in; fade out as the logo holds at the end.
-    volume={(f) =>
-      interpolate(f, [0, 12, LIFECYCLE_DURATION - 50, LIFECYCLE_DURATION - 2], [0, MUSIC_VOLUME, MUSIC_VOLUME, 0], clamp)
-    }
+    volume={(f) => {
+      const base = MUSIC_VOLUME + (MUSIC_DUCKED - MUSIC_VOLUME) * voiceActive(f);
+      // Short fade in; fade out as the logo holds at the end.
+      return base * interpolate(f, [0, 12, LIFECYCLE_DURATION - 40, LIFECYCLE_DURATION - 2], [0, 1, 1, 0], clamp);
+    }}
   />
 );
 
@@ -202,6 +240,7 @@ const Backdrop: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     }}
   >
     <Music />
+    <Voiceover />
     {children}
   </AbsoluteFill>
 );
