@@ -8,10 +8,26 @@ const easeOut = Easing.bezier(0.16, 1, 0.3, 1);
 // Logo builds in: wordmark fades up, slash draws upward, then RAPID rises along the slash.
 const SLASH_TAN = Math.tan((18 * Math.PI) / 180);
 
-export const MesonRapidLogo: React.FC<{ start: number }> = ({ start }) => {
+type LogoTiming = { wordmark: number; slash: number; rapid: number };
+const DEFAULT_TIMING: LogoTiming = { wordmark: 0, slash: 10, rapid: 22 };
+
+// Horizontal offset of the slash's centre from the logo's left edge (layout px),
+// for callers that need to line something up with it.
+export const LOGO_SLASH_CENTER_X = 157 + 16 + 1.5;
+
+export const MesonRapidLogo: React.FC<{
+  start: number;
+  // Frame offsets (from `start`) for each part to begin animating.
+  timing?: LogoTiming;
+  // "bottom": slash draws upward from its base; "top": downward, e.g. to
+  // continue a line coming into the logo from above.
+  slashFrom?: "bottom" | "top";
+}> = ({ start, timing = DEFAULT_TIMING, slashFrom = "bottom" }) => {
   const frame = useCurrentFrame();
   const f = frame - start;
-  const rise = interpolate(f, [22, 52], [1, 0], {
+  const w = f - timing.wordmark;
+  const sl = interpolate(f - timing.slash, [0, 16], [100, 0], { ...clamp, easing: easeOut });
+  const rise = interpolate(f - timing.rapid, [0, 30], [1, 0], {
     ...clamp,
     easing: Easing.out(Easing.cubic),
   });
@@ -24,8 +40,8 @@ export const MesonRapidLogo: React.FC<{ start: number }> = ({ start }) => {
           height: 40,
           width: "auto",
           display: "block",
-          opacity: interpolate(f, [0, 14], [0, 1], clamp),
-          translate: `0 ${interpolate(f, [0, 20], [10, 0], { ...clamp, easing: easeOut })}px`,
+          opacity: interpolate(w, [0, 14], [0, 1], clamp),
+          translate: `0 ${interpolate(w, [0, 20], [10, 0], { ...clamp, easing: easeOut })}px`,
         }}
       />
       <span
@@ -36,11 +52,7 @@ export const MesonRapidLogo: React.FC<{ start: number }> = ({ start }) => {
           transform: "skewX(-18deg)",
           borderRadius: 2,
           flex: "none",
-          // Draw the slash upward from its base.
-          clipPath: `inset(${interpolate(f, [10, 26], [100, 0], {
-            ...clamp,
-            easing: easeOut,
-          })}% 0 0 0)`,
+          clipPath: slashFrom === "bottom" ? `inset(${sl}% 0 0 0)` : `inset(0 0 ${sl}% 0)`,
         }}
       />
       {/* Clip box so RAPID emerges from the slash rather than floating in */}

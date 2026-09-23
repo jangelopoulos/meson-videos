@@ -1,226 +1,197 @@
-import React, { useMemo } from "react";
-import {
-  AbsoluteFill,
-  Easing,
-  interpolate,
-  staticFile,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import React from "react";
+import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { BRAND, fontFamily } from "../brand";
-import { MesonRapidLogo } from "../MesonRapidLogo";
-import { CARDS } from "./cards";
+import { LOGO_SLASH_CENTER_X, MesonRapidLogo } from "../MesonRapidLogo";
+import {
+  APPT_H,
+  ApptStage,
+  CALL_H,
+  COL_W,
+  CRM_H,
+  CallStage,
+  CrmStage,
+  FOLLOW_H,
+  FollowStage,
+  LEAD_H,
+  LeadStage,
+  QUAL_H,
+  QualStage,
+} from "./stages";
+import { clamp, easeInOut } from "./ui";
 
-const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
-const easeOut = Easing.bezier(0.16, 1, 0.3, 1);
-const easeInOut = Easing.bezier(0.65, 0, 0.35, 1);
+// The chain runs downward: each stage plays, then a line draws down to the
+// next one while the camera follows. It ends by running into the logo.
 
-// Keyframes the extracted card markup references (from the source page).
-const KEYFRAMES = `
-@keyframes bubbleFloat { 0% { transform: translateY(-4px); } 100% { transform: translateY(5px); } }
-@keyframes eq { 0% { transform: scaleY(0.35); } 100% { transform: scaleY(1); } }
-@keyframes pulseDot {
-  0%, 100% { box-shadow: rgba(14,138,125,.45) 0 0 0 0; }
-  70% { box-shadow: rgba(14,138,125,0) 0 0 0 6px; }
-}`;
+type Stage = { C: React.FC<{ t: number }>; h: number; hold: number };
 
-// ---- Layout (world units = the source page's px) ----
-const CARD_W = 464;
-const GAP = 220; // connector length between cards
-const STEP = CARD_W + GAP;
-const cardX = (i: number) => i * STEP; // left edge of card i
-const ROW_W = CARDS.length * CARD_W + (CARDS.length - 1) * GAP;
+// `hold`: frames after a stage's line arrives before the next line starts,
+// long enough for that stage's own animation to play out and settle.
+const STAGES: Stage[] = [
+  { C: LeadStage, h: LEAD_H, hold: 96 },
+  { C: CallStage, h: CALL_H, hold: 96 },
+  { C: QualStage, h: QUAL_H, hold: 136 },
+  { C: ApptStage, h: APPT_H, hold: 122 },
+  { C: CrmStage, h: CRM_H, hold: 104 },
+  { C: FollowStage, h: FOLLOW_H, hold: 88 },
+];
 
-const FOCUS_SCALE = 1.6; // one card fills the frame
-const OVERVIEW_SCALE = 1760 / ROW_W; // whole chain fits the frame
+const GAP = 130; // connector length between stages (layout px)
+const LOGO_SCALE = 1.25;
+const LOGO_H = 52 * LOGO_SCALE;
+// The slash is skewed -18deg, so its top sits right of its centre.
+const SLASH_TOP_X = LOGO_SLASH_CENTER_X + 26 * Math.tan((18 * Math.PI) / 180);
 
-// ---- Timeline (frames @30fps) ----
-const FIRST_IN = 12;
-const HOLD = 66; // time on each card
-const TRANS = 36; // line draw + camera move to the next card
-const ENTER = 15; // "fade + 18px rise, 0.5s" from the source spec
-const stageStart = (i: number) => FIRST_IN + i * (HOLD + TRANS);
-const transStart = (i: number) => stageStart(i) + HOLD; // i -> i+1
-const LAST = CARDS.length - 1;
-const ZOOM_START = stageStart(LAST) + HOLD;
-const ZOOM_LEN = 45;
-const OUTRO_START = ZOOM_START + ZOOM_LEN - 6;
-export const LIFECYCLE_DURATION = OUTRO_START + 110;
+// Vertical layout: top of each block, logo block last.
+const TOPS: number[] = [];
+{
+  let y = 0;
+  for (const s of STAGES) {
+    TOPS.push(y);
+    y += s.h + GAP;
+  }
+  TOPS.push(y);
+}
+const blockH = (i: number) => (i < STAGES.length ? STAGES[i].h : LOGO_H);
+// Approximate full logo width (wordmark + gap + slash + gap + RAPID), used to
+// centre the finished logo rather than its slash.
+const LOGO_W = 157 + 16 + 3 + 16 + 80;
+const LOGO_CENTER_SHIFT = (LOGO_W / 2 - SLASH_TOP_X) * LOGO_SCALE;
+const centerY = (i: number) => TOPS[i] + blockH(i) / 2;
 
-// When card i starts to appear: as the incoming line reaches it.
-const cardEnter = (i: number) => (i === 0 ? FIRST_IN : transStart(i - 1) + 22);
+// Timeline.
+const FIRST_ARRIVE = 8;
+const LINE = 24; // line draw
+const CAM = 38; // camera move (starts with the line)
+const ARRIVE: number[] = [FIRST_ARRIVE];
+const LINE_START: number[] = [];
+STAGES.forEach((s, i) => {
+  LINE_START.push(ARRIVE[i] + s.hold);
+  ARRIVE.push(LINE_START[i] + LINE);
+});
+const LOGO_ARRIVE = ARRIVE[STAGES.length];
+export const LIFECYCLE_DURATION = LOGO_ARRIVE + 96;
 
-const resolveAssets = (html: string) =>
-  html.replace(/\{\{asset:([^}]+)\}\}/g, (_, f: string) => staticFile(`lifecycle/${f}`));
+const Connector: React.FC<{ i: number; frame: number; clear: number }> = ({ i, frame, clear }) => {
+  const start = LINE_START[i];
+  const p = interpolate(frame, [start, start + LINE], [0, 1], { ...clamp, easing: easeInOut });
+  if (p <= 0) return null;
+  const x = COL_W / 2;
+  const toLogo = i === STAGES.length - 1;
+  const y1 = TOPS[i] + STAGES[i].h + 12;
+  // The last line runs straight into the top of the logo's slash.
+  const y2 = toLogo ? TOPS[i + 1] + 2 : TOPS[i + 1] - 12;
+  const head = y1 + (y2 - y1) * p;
+  const arrived = interpolate(frame, [start + LINE, start + LINE + 12], [0, 1], clamp);
+  return (
+    <g opacity={toLogo ? 1 : clear}>
+      <line x1={x} y1={y1} x2={x} y2={head} stroke={BRAND.teal} strokeWidth={3} strokeLinecap="round" opacity={1 - 0.35 * arrived} />
+      <circle cx={x} cy={y1} r={5} fill={BRAND.teal} />
+      {toLogo ? null : (
+        <>
+          <circle cx={x} cy={head} r={14} fill={BRAND.teal} opacity={0.25 * (1 - arrived)} />
+          <circle cx={x} cy={head} r={6} fill={BRAND.teal} />
+        </>
+      )}
+    </g>
+  );
+};
 
-const Card: React.FC<{ index: number; focus: number; overview: number }> = ({
-  index,
-  focus,
-  overview,
-}) => {
+const Chain: React.FC<{ scale: number; logoScreenScale: number }> = ({ scale, logoScreenScale }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const card = CARDS[index];
-  const html = useMemo(() => resolveAssets(card.html), [card.html]);
-  const enter = cardEnter(index);
-  // Cards we've moved past recede (darken, shrink slightly) once the camera is
-  // well on its way; everything returns for the overview.
-  const past = Math.max(0, Math.min(1, (focus - index - 0.3) / 0.7)) * (1 - overview);
+
+  let focus = 0;
+  LINE_START.forEach((s) => {
+    focus += interpolate(frame, [s, s + CAM], [0, 1], { ...clamp, easing: easeInOut });
+  });
+  const i0 = Math.min(Math.floor(focus), STAGES.length);
+  const frac = focus - i0;
+  const camY = i0 >= STAGES.length ? centerY(i0) : centerY(i0) + (centerY(i0 + 1) - centerY(i0)) * frac;
+  // Push in a little on the logo at the end.
+  const endZoom = interpolate(focus, [STAGES.length - 1, STAGES.length], [1, logoScreenScale], clamp);
+  const s = scale * endZoom;
+  const clear = interpolate(focus, [STAGES.length - 0.8, STAGES.length - 0.1], [1, 0], clamp);
+  // Once the logo has built, ease across so it sits centred in frame.
+  const settle = interpolate(frame, [LOGO_ARRIVE + 30, LOGO_ARRIVE + 60], [0, 1], { ...clamp, easing: easeInOut });
 
   return (
     <div
       style={{
         position: "absolute",
-        left: cardX(index),
-        top: 0,
-        width: CARD_W,
-        translate: `0 calc(-50% + ${interpolate(frame, [enter, enter + ENTER], [18, 0], {
-          ...clamp,
-          easing: easeOut,
-        })}px)`,
-        opacity: interpolate(frame, [enter, enter + ENTER], [0, 1], clamp),
-        filter: `brightness(${1 - 0.6 * past})`,
-        scale: String(1 - 0.04 * past),
+        left: "50%",
+        top: "50%",
+        width: 0,
+        height: 0,
+        transformOrigin: "0 0",
+        transform: `scale(${s}) translate(${-(COL_W / 2 + LOGO_CENTER_SHIFT * settle)}px, ${-camY}px)`,
       }}
     >
+      <svg style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }} width={1} height={1}>
+        {STAGES.map((_, i) => (
+          <Connector key={i} i={i} frame={frame} clear={clear} />
+        ))}
+      </svg>
+      {STAGES.map(({ C }, i) => {
+        // Stages we've moved past dim; all of them clear away for the logo.
+        const past = Math.max(0, Math.min(1, (focus - i - 0.3) / 0.7));
+        const t = frame - ARRIVE[i];
+        if (t < 0) return null;
+        return (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              left: 0,
+              top: TOPS[i],
+              width: COL_W,
+              filter: `brightness(${1 - 0.6 * past})`,
+              opacity: clear,
+            }}
+          >
+            <C t={t} />
+          </div>
+        );
+      })}
+      {/* Logo: the top of its slash sits on the column centre so the last line flows into it */}
       <div
-        // Drives the card's own looping animations (orbit bubbles, waveform, pulse).
-        style={{ "--t": `${frame / fps}s`, display: "flex", flexDirection: "column" } as React.CSSProperties}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+        style={{
+          position: "absolute",
+          left: COL_W / 2 - SLASH_TOP_X,
+          top: TOPS[STAGES.length],
+          // The chain container is 0px wide; stop the logo shrinking to fit it.
+          width: "max-content",
+          transformOrigin: `${SLASH_TOP_X}px 0px`,
+          scale: String(LOGO_SCALE),
+        }}
+      >
+        <MesonRapidLogo start={LOGO_ARRIVE} slashFrom="top" timing={{ slash: 0, wordmark: 8, rapid: 14 }} />
+      </div>
     </div>
   );
 };
 
-const Connector: React.FC<{ index: number }> = ({ index }) => {
-  const frame = useCurrentFrame();
-  const start = transStart(index);
-  const x1 = cardX(index) + CARD_W + 14;
-  const x2 = cardX(index + 1) - 14;
-  const p = interpolate(frame, [start, start + 28], [0, 1], { ...clamp, easing: easeInOut });
-  if (p <= 0) return null;
-  const head = x1 + (x2 - x1) * p;
-  const arrived = interpolate(frame, [start + 28, start + 40], [0, 1], clamp);
-  return (
-    <g>
-      <line
-        x1={x1}
-        y1={0}
-        x2={head}
-        y2={0}
-        stroke={BRAND.teal}
-        strokeWidth={3}
-        strokeLinecap="round"
-        opacity={1 - 0.35 * arrived}
-      />
-      <circle cx={x1} cy={0} r={5} fill={BRAND.teal} />
-      {/* Travelling head with a soft glow */}
-      <circle cx={head} cy={0} r={14} fill={BRAND.teal} opacity={0.25 * (1 - arrived)} />
-      <circle cx={head} cy={0} r={6} fill={BRAND.teal} />
-    </g>
-  );
-};
+const Backdrop: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <AbsoluteFill
+    style={{
+      background:
+        "radial-gradient(ellipse 55% 60% at 50% 45%, rgba(20,184,166,.10) 0%, rgba(20,184,166,0) 70%), radial-gradient(ellipse 120% 90% at 50% 50%, #151515 0%, #0B0B0B 100%)",
+      fontFamily,
+      overflow: "hidden",
+    }}
+  >
+    {children}
+  </AbsoluteFill>
+);
 
-export const RapidLifecycle: React.FC = () => {
-  const frame = useCurrentFrame();
+// 1920x1080
+export const RapidLifecycle: React.FC = () => (
+  <Backdrop>
+    <Chain scale={1.6} logoScreenScale={1.2} />
+  </Backdrop>
+);
 
-  // Which card the camera is on (fractional while moving between cards).
-  let focus = 0;
-  for (let i = 0; i < LAST; i++) {
-    focus += interpolate(frame, [transStart(i), transStart(i) + TRANS], [0, 1], {
-      ...clamp,
-      easing: easeInOut,
-    });
-  }
-  const overview = interpolate(frame, [ZOOM_START, ZOOM_START + ZOOM_LEN], [0, 1], {
-    ...clamp,
-    easing: easeInOut,
-  });
-
-  // Camera: centre of the focused card, easing out to the middle of the row.
-  const focusCamX = focus * STEP + CARD_W / 2;
-  const camX = focusCamX + (ROW_W / 2 - focusCamX) * overview;
-  const scale = FOCUS_SCALE + (OVERVIEW_SCALE - FOCUS_SCALE) * overview;
-  // Lift the row in the overview to make room for the closing line and logo.
-  const camYScreen = -120 * overview;
-
-  return (
-    <AbsoluteFill
-      style={{
-        background:
-          "radial-gradient(ellipse 55% 60% at 50% 45%, rgba(20,184,166,.10) 0%, rgba(20,184,166,0) 70%), radial-gradient(ellipse 120% 90% at 50% 50%, #151515 0%, #0B0B0B 100%)",
-        fontFamily,
-        overflow: "hidden",
-      }}
-    >
-      <style>{KEYFRAMES}</style>
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: `calc(50% + ${camYScreen}px)`,
-          width: 0,
-          height: 0,
-          transformOrigin: "0 0",
-          transform: `scale(${scale}) translateX(${-camX}px)`,
-        }}
-      >
-        <svg
-          style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}
-          width={1}
-          height={1}
-        >
-          {CARDS.slice(0, LAST).map((_, i) => (
-            <Connector key={i} index={i} />
-          ))}
-        </svg>
-        {CARDS.map((c, i) => (
-          <Card key={c.id} index={i} focus={focus} overview={overview} />
-        ))}
-      </div>
-
-      {/* Closing line and logo */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 700,
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <span
-          style={{
-            fontSize: 30,
-            fontWeight: 600,
-            background: BRAND.teal,
-            color: "#0A2F2B",
-            borderRadius: 999,
-            padding: "14px 30px",
-            opacity: interpolate(frame, [OUTRO_START, OUTRO_START + 15], [0, 1], clamp),
-            translate: `0 ${interpolate(frame, [OUTRO_START, OUTRO_START + 22], [16, 0], {
-              ...clamp,
-              easing: easeOut,
-            })}px`,
-          }}
-        >
-          One enquiry, worked end to end.
-        </span>
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 110,
-          display: "flex",
-          justifyContent: "center",
-          scale: "1.45",
-        }}
-      >
-        <MesonRapidLogo start={OUTRO_START + 12} />
-      </div>
-    </AbsoluteFill>
-  );
-};
+// 1080x1920: column fills ~82% of the width.
+export const RapidLifecycleVertical: React.FC = () => (
+  <Backdrop>
+    <Chain scale={1.9} logoScreenScale={1.1} />
+  </Backdrop>
+);
