@@ -1,54 +1,62 @@
-import { loadFont } from "@remotion/google-fonts/SourceSans3";
+import { loadFont as loadSerif } from "@remotion/google-fonts/CormorantGaramond";
+import { loadFont as loadSans } from "@remotion/google-fonts/SourceSans3";
 import { Easing } from "remotion";
 
-const { fontFamily } = loadFont("normal", {
+const sans = loadSans("normal", {
   weights: ["400", "600", "700"],
   subsets: ["latin"],
 });
+const serif = loadSerif("normal", {
+  weights: ["400", "500", "600"],
+  subsets: ["latin"],
+});
+loadSerif("italic", { weights: ["400", "500"], subsets: ["latin"] });
 
-export const FONT = fontFamily;
+/** UI sans, matching the product. */
+export const SANS = sans.fontFamily;
+/** Editorial display serif for the luxury layer. */
+export const SERIF = serif.fontFamily;
+export const FONT = SANS;
 
 export const COLORS = {
+  night: "#050B15",
   navy: "#0B1220",
-  navySoft: "#151E31",
+  deep: "#0A1A2E",
+  aegean: "#123A5E",
+  gold: "#C8A56A",
+  goldLight: "#E8D3A6",
+  ivory: "#F6F1E7",
+  ivoryMuted: "rgba(246,241,231,0.72)",
   ink: "#111827",
   muted: "#6B7280",
-  line: "#E5E7EB",
-  paper: "#F7F7F5",
   white: "#FFFFFF",
-  green: "#15803D",
-  greenSoft: "#E8F5EC",
+  green: "#3CCB82",
   blue: "#3B4FE4",
-  blueSoft: "#E8EBFF",
-  amber: "#C2410C",
-  amberSoft: "#FFF1E6",
-  beige: "#F2EFE6",
+  line: "#E5E7EB",
 };
 
-/** Smooth "ease out expo" used for camera, scroll and cursor moves. */
+/** Smooth "ease out expo" used for camera and object moves. */
 export const EASE = Easing.bezier(0.22, 1, 0.36, 1);
-
-/** Standard fade/slide-in easing for text. */
 export const EASE_IN = Easing.bezier(0.16, 1, 0.3, 1);
+export const EASE_INOUT = Easing.bezier(0.65, 0, 0.35, 1);
+/** Slight overshoot, for things that pop. */
+export const EASE_POP = Easing.bezier(0.34, 1.56, 0.64, 1);
+
+export const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+/** Eased 0 → 1 progress of `duration` frames starting at `start`. */
+export const prog = (
+  frame: number,
+  start: number,
+  duration: number,
+  easing: (t: number) => number = EASE,
+) => easing(clamp01((frame - start) / duration));
 
 export type Keyframe = { at: number; value: number };
 
-/**
- * Interpolate a list of {at, value} keyframes. Segments with equal values act as holds.
- * Clamped on both ends.
- */
+/** Interpolate {at, value} keyframes. Equal neighbouring values act as holds. */
 export const kf = (frame: number, keys: Keyframe[], easing = EASE): number => {
-  if (keys.length === 1) {
-    return keys[0].value;
-  }
-  return interpolateKeys(frame, keys, easing);
-};
-
-const interpolateKeys = (
-  frame: number,
-  keys: Keyframe[],
-  easing: (t: number) => number,
-) => {
   if (frame <= keys[0].at) {
     return keys[0].value;
   }
@@ -67,18 +75,10 @@ const interpolateKeys = (
   return last.value;
 };
 
-/** 0 → 1 fade helper with clamping. */
-export const fadeIn = (frame: number, from: number, duration = 12) => {
-  if (frame <= from) {
-    return 0;
-  }
-  if (frame >= from + duration) {
-    return 1;
-  }
-  return EASE_IN((frame - from) / duration);
-};
+export const fadeIn = (frame: number, from: number, duration = 12) =>
+  prog(frame, from, duration, EASE_IN);
 
-/** 1 → 0 fade helper with clamping. */
-export const fadeOut = (frame: number, from: number, duration = 12) => {
-  return 1 - fadeIn(frame, from, duration);
-};
+export const fadeOut = (frame: number, from: number, duration = 12) =>
+  1 - fadeIn(frame, from, duration);
+
+export const fmt = (n: number) => Math.round(n).toLocaleString("en-US");

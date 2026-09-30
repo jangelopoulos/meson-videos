@@ -13,26 +13,32 @@ Welcome to your Remotion project!
 
 ## Videos in this repo
 
-### `KymaDemo` — Kyma property marketplace walkthrough
+### `KymaDemo` — Kyma property marketplace film
 
-A 56-second, 1920×1080 product demo of the Kyma site (international buyers investing in Greek property).
-Source lives in `src/kyma/`, screenshots in `public/screens/`.
+A 60-second, 1920×1080 cinematic product film for Kyma (international buyers investing in Greek property).
+Source lives in `src/kyma/`. Original screenshots are in `public/screens/`; photos and UI cards cropped from them
+are in `public/kyma/`.
 
-Scenes (each is also registered on its own under the `KymaDemo-Scenes` folder in Studio so it can be tweaked in isolation):
+Look and feel: Aegean navy, champagne gold and ivory; Cormorant Garamond for editorial titles and Source Sans 3
+(the product's UI font); film grain, vignette, letterboxing and drifting gold light.
+
+Scenes (each is also registered on its own under the `KymaDemo-Scenes` folder in Studio):
 
 | Scene | What happens |
 | --- | --- |
-| `Intro` | Logo and headline on navy |
-| `Home` | Desktop home: zoom into search, click goal chips, scroll to verified listings, click "See all" |
-| `MapSearch` | Map/filter page: refine filters, area pins pulse, click a pin, open a listing card |
-| `Listing` | Listing page: price panel, then spotlights on legal checks, yields, acquisition costs and Golden Visa |
-| `Mobile` | Phone flow: home → tap Search → map → tap card → listing, then all three screens together |
-| `Summary` | The five buyer questions the product answers, plus the qualified call-back line |
-| `Outro` | Logo and one-line positioning |
+| `Opening` | Letterbox opens on an aerial of the coast; "The Aegean, without the guesswork." |
+| `Reveal` | A 3D laptop rises and its lid opens, the screen powers on, a phone swings in, verified facts float off |
+| `Search` | Typing a location and tapping goal chips; the chips lift off the glass into a filter stack, then the verified listing cards rise out of the screen |
+| `MapGreece` | Greece as a constellation of towns on a tilting 3D plane; gold light columns rise per area, height = price per m² |
+| `Listing` | The villa photo, full bleed, shrinks into the phone; then the five buyer questions burst out of the phone as cards from the real listing page (legal scan, yield and cost counters, a Golden Visa seal, vetted partners) |
+| `CallBack` | Gold arcs from buyer cities to Greece with live local clocks; phone notifications for a booked call-back and a qualified enquiry |
+| `Everywhere` | A slow orbit around laptop and phones on a glossy floor |
+| `Finale` | Sunset, logo and positioning line; the letterbox closes |
 
-Timings are keyframed per scene (`kf()` in `src/kyma/theme.ts`); durations are in `src/kyma/KymaDemo.tsx`.
-Screenshot hotspots (chips, cards, pins) are expressed in original screenshot pixels multiplied by `K`, so swapping in a
-new export of the same layout only needs the coordinates checked.
+Building blocks: `devices.tsx` (3D `Laptop` with hinged lid and keyboard deck, titanium `Phone`, `Stage`),
+`fx.tsx` (grain, dust, light sweeps, backdrop, letterbox), `type.tsx` (masked line reveals, chapter titles),
+`ui.tsx` (glass chips, icons). Timings are keyframed per scene with `prog()`/`kf()` from `theme.ts`;
+scene durations are in `KymaDemo.tsx`.
 
 Render it with:
 
