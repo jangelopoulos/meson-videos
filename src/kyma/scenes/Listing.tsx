@@ -129,12 +129,13 @@ const BadgePanel: React.FC<{ big: string; small: string }> = ({ big, small }) =>
   </div>
 );
 
-const AccentLayer: React.FC<{ beat: Beat; f: number; frame: number; w: number; h: number }> = ({
+const AccentLayer: React.FC<{ beat: Beat; f: number; frame: number; w: number; h: number; fade: number }> = ({
   beat,
   f,
   frame,
   w,
   h,
+  fade,
 }) => {
   if (beat.accent === "scan") {
     const scan = prog(f, 20, 26, (t) => t);
@@ -150,6 +151,7 @@ const AccentLayer: React.FC<{ beat: Beat; f: number; frame: number; w: number; h
               width: w + 20,
               height: 3,
               backgroundColor: COLORS.goldLight,
+              opacity: fade,
               boxShadow: `0 0 24px 6px rgba(232,211,166,0.6)`,
               transform: "translateZ(30px)",
             }}
@@ -160,7 +162,7 @@ const AccentLayer: React.FC<{ beat: Beat; f: number; frame: number; w: number; h
             position: "absolute",
             left: w / 2 - 40,
             top: -h / 2 - 30,
-            opacity: prog(f, 30, 8),
+            opacity: prog(f, 30, 8) * fade,
             transform: `translateZ(90px) translate(-100%, -50%) scale(${lerp(0.5, 1, pop)})`,
           }}
         >
@@ -182,7 +184,7 @@ const AccentLayer: React.FC<{ beat: Beat; f: number; frame: number; w: number; h
           position: "absolute",
           left: w / 2 + 40,
           top: -h / 2 + 10,
-          opacity: prog(f, 16, 8),
+          opacity: prog(f, 16, 8) * fade,
           transform: `translateZ(110px) translate(-100%, -70%) scale(${lerp(0.5, 1, pop)})`,
           transformOrigin: "100% 100%",
         }}
@@ -203,7 +205,7 @@ const AccentLayer: React.FC<{ beat: Beat; f: number; frame: number; w: number; h
           top: -h / 2 - size * 1.02,
           width: size,
           height: size,
-          opacity: prog(f, 14, 8),
+          opacity: prog(f, 14, 8) * fade,
           transform: `translateZ(120px) scale(${lerp(0.3, 1, pop)}) rotate(${lerp(-40, 0, pop)}deg)`,
         }}
       >
@@ -260,7 +262,7 @@ const AccentLayer: React.FC<{ beat: Beat; f: number; frame: number; w: number; h
               position: "absolute",
               left: col * 330,
               top: h / 2 + 70 + row * 84,
-              opacity: prog(f, 14 + j * 4, 8),
+              opacity: prog(f, 14 + j * 4, 8) * fade,
               transform: `translateZ(${60 + j * 12}px) translate(-50%, -50%) scale(${lerp(0.5, 1, pop)})`,
             }}
           >
@@ -369,6 +371,7 @@ export const Listing: React.FC = () => {
           const x = lerp(PCX - CARD_CX, 0, cin) + cout * 260;
           const y = lerp(PCY - CARD_CY, 0, cin) - cout * 80 + Math.sin(frame / 26) * 6 * cin;
           const z = lerp(-300, 0, cin) - cout * 520;
+          const fade = Math.min(prog(f, 4, 8), 1 - cout);
           return (
             <div
               key={b.num}
@@ -379,7 +382,6 @@ export const Listing: React.FC = () => {
                 width: 0,
                 height: 0,
                 transformStyle: "preserve-3d",
-                opacity: Math.min(prog(f, 4, 8), 1 - cout),
                 transform: `translate3d(${x}px, ${y}px, ${z}px) rotateY(${lerp(40, -6, cin) - cout * 22}deg) rotateX(${lerp(10, 2, cin)}deg) scale(${lerp(0.25, 1, cin)})`,
               }}
             >
@@ -392,13 +394,14 @@ export const Listing: React.FC = () => {
                   height: h,
                   borderRadius: 18,
                   overflow: "hidden",
+                  opacity: fade,
                   boxShadow: "0 50px 100px rgba(0,0,0,0.55), 0 0 0 1.5px rgba(232,211,166,0.55)",
                 }}
               >
                 <Img src={staticFile(b.img)} style={{ width: w, height: h, display: "block" }} />
                 <LightSweep frame={f} from={22} duration={28} opacity={0.7} />
               </div>
-              <AccentLayer beat={b} f={f} frame={frame} w={w} h={h} />
+              <AccentLayer beat={b} f={f} frame={frame} w={w} h={h} fade={fade} />
             </div>
           );
         })}

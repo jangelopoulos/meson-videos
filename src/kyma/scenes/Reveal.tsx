@@ -44,7 +44,6 @@ export const Reveal: React.FC = () => {
           style={{
             left: LCX - LW / 2,
             top: LCY - d.lidH / 2,
-            opacity: prog(frame, 0, 12),
             transform: `translateY(${lerp(560, 0, enter)}px) translateZ(${lerp(-300, 0, enter)}px) rotateX(${lerp(-42, -15, enter)}deg) rotateY(${lerp(-36, -14, enter) + drift * 8}deg)`,
           }}
           screen={
@@ -64,7 +63,6 @@ export const Reveal: React.FC = () => {
           style={{
             left: 1620 - pd.outerW / 2,
             top: 610 - pd.outerH / 2,
-            opacity: prog(frame, 80, 10),
             transform: `translateX(${lerp(560, 0, phoneIn)}px) translateZ(170px) translateY(${Math.sin(frame / 28) * 8}px) rotateY(${lerp(-70, -22, phoneIn) + drift * 6}deg) rotateX(-4deg)`,
           }}
         >

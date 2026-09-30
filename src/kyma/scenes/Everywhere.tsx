@@ -78,7 +78,6 @@ export const Everywhere: React.FC = () => {
             style={{
               left: -LW / 2,
               top: -d.lidH / 2,
-              opacity: prog(frame, 0, 10),
             }}
             screen={
               <>
