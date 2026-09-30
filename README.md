@@ -13,37 +13,28 @@ Welcome to your Remotion project!
 
 ## Videos in this repo
 
-### `KymaDemo` — Kyma property marketplace film
+### `KymaDemo` — Kyma 20-second product film
 
-A 60-second, 1920×1080 cinematic product film for Kyma (international buyers investing in Greek property).
-Source lives in `src/kyma/`. Original screenshots are in `public/screens/`; photos and UI cards cropped from them
-are in `public/kyma/`.
+A 20-second, 1920×1080 film for Kyma (international buyers investing in Greek property), shot as one
+continuous camera move with no crossfades. Source lives in `src/kyma/film/`; screenshots in `public/screens/`,
+the villa photo and listing card crop in `public/kyma/`.
 
-Look and feel: Aegean navy, champagne gold and ivory; Cormorant Garamond for editorial titles and Source Sans 3
-(the product's UI font); film grain, vignette, letterboxing and drifting gold light.
-
-Scenes (each is also registered on its own under the `KymaDemo-Scenes` folder in Studio):
-
-| Scene | What happens |
+| Time | What happens |
 | --- | --- |
-| `Opening` | Letterbox opens on an aerial of the coast; "The Aegean, without the guesswork." |
-| `Reveal` | A 3D laptop rises and its lid opens, the screen powers on, a phone swings in, verified facts float off |
-| `Search` | Typing a location and tapping goal chips; the chips lift off the glass into a filter stack, then the verified listing cards rise out of the screen |
-| `MapGreece` | Greece as a constellation of towns on a tilting 3D plane; gold light columns rise per area, height = price per m² |
-| `Listing` | The villa photo, full bleed, shrinks into the phone; then the five buyer questions burst out of the phone as cards from the real listing page (legal scan, yield and cost counters, a Golden Visa seal, vetted partners) |
-| `CallBack` | Gold arcs from buyer cities to Greece with live local clocks; phone notifications for a booked call-back and a qualified enquiry |
-| `Everywhere` | A slow orbit around laptop and phones on a glossy floor |
-| `Finale` | Sunset, logo and positioning line; the letterbox closes |
+| 0–2 s | Opens tight on the home page's aerial photo with the title; the camera pulls back to reveal the site on a laptop |
+| 2–5.5 s | Cursor toggles "Verified only", presses Search, the page scrolls to the verified listings, a card lifts on hover and is clicked |
+| 5.5–7 s | The card's villa photo flies out of the laptop into the phone's listing as the laptop slides away |
+| 7–14 s | Legal checks tick through; tap Net yield to open a sheet with growing yield bars; tap Costs (line items stack to the total) and Visa |
+| 14–16 s | Sticky Enquire bar, tap, "Requested", call-back notification drops in |
+| 16–20 s | The notification's app icon grows into the Kyma logo and the positioning line |
 
-Building blocks: `devices.tsx` (3D `Laptop` with hinged lid and keyboard deck, titanium `Phone`, `Stage`),
-`fx.tsx` (grain, dust, light sweeps, backdrop, letterbox), `type.tsx` (masked line reveals, chapter titles),
-`ui.tsx` (glass chips, icons). Timings are keyframed per scene with `prog()`/`kf()` from `theme.ts`;
-scene durations are in `KymaDemo.tsx`.
+All beat timings live in `T` in `film/layout.ts`, with the camera path in `camera()`.
+Captions beside the phone are in `film/Captions.tsx`.
 
 Render it with:
 
 ```console
-npx remotion render KymaDemo out/kyma-demo.mp4
+npx remotion render KymaDemo out/kyma-20s.mp4
 ```
 
 ## Commands

@@ -1,32 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Img, staticFile } from "remotion";
-
-/** 3D space. Children are absolutely positioned and share one perspective. */
-export const Stage: React.FC<{ children: React.ReactNode; perspective?: number; origin?: string }> = ({
-  children,
-  perspective = 2200,
-  origin = "50% 45%",
-}) => (
-  <AbsoluteFill style={{ perspective, perspectiveOrigin: origin, transformStyle: "preserve-3d" }}>
-    {children}
-  </AbsoluteFill>
-);
-
-/**
- * Project a point in a Stage's 3D space to the 2D frame, for overlays that must
- * always draw in front (Chrome's 3D depth sorting can clip floating labels).
- */
-export const projectPoint = (
-  x: number,
-  y: number,
-  z: number,
-  perspective: number,
-  originX: number,
-  originY: number,
-) => {
-  const k = perspective / (perspective - z);
-  return { x: originX + (x - originX) * k, y: originY + (y - originY) * k, k };
-};
+import { Img, staticFile } from "remotion";
 
 // ---------------------------------------------------------------- Phone
 
@@ -48,43 +21,19 @@ export const phoneDims = (width: number) => {
 };
 
 /**
- * Titanium phone with real thickness. `width` is the screen width.
- * The screenshot is scaled slightly past the right edge to hide the scrollbar.
- * Children are drawn on top of the screen, in screen pixels.
+ * Titanium phone. `width` is the screen width. The screenshot is scaled slightly
+ * past the right edge to hide its scrollbar. Children draw on the screen, in screen pixels.
  */
 export const Phone: React.FC<{
   width: number;
   src?: string;
   children?: React.ReactNode;
   style?: React.CSSProperties;
-  reflect?: boolean;
-  screenOpacity?: number;
-}> = ({ width, src, children, style, reflect = false, screenOpacity = 1 }) => {
+}> = ({ width, src, children, style }) => {
   const d = phoneDims(width);
   const R = d.radius + d.bezel;
-  const imgW = (width * 804) / 788;
   return (
-    <div
-      style={{
-        position: "absolute",
-        width: d.outerW,
-        height: d.outerH,
-        transformStyle: "preserve-3d",
-        ...style,
-      }}
-    >
-      {[2, 4, 6, 8, 10].map((z) => (
-        <div
-          key={z}
-          style={{
-            position: "absolute",
-            inset: 0,
-            borderRadius: R,
-            backgroundColor: "#2b3039",
-            transform: `translateZ(${-z}px)`,
-          }}
-        />
-      ))}
+    <div style={{ position: "absolute", width: d.outerW, height: d.outerH, ...style }}>
       <div
         style={{
           position: "absolute",
@@ -105,13 +54,12 @@ export const Phone: React.FC<{
           borderRadius: d.radius,
           overflow: "hidden",
           backgroundColor: "#000",
-          transform: "translateZ(0.5px)",
         }}
       >
         {src ? (
           <Img
             src={staticFile(src)}
-            style={{ position: "absolute", left: 0, top: 0, width: imgW, opacity: screenOpacity }}
+            style={{ position: "absolute", left: 0, top: 0, width: (width * 804) / 788, maxWidth: "none" }}
           />
         ) : null}
         {children}
@@ -120,177 +68,52 @@ export const Phone: React.FC<{
             position: "absolute",
             inset: 0,
             pointerEvents: "none",
-            background: "linear-gradient(118deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 30%)",
+            background: "linear-gradient(118deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 28%)",
           }}
         />
       </div>
-      {/* Side buttons */}
       <div style={{ position: "absolute", left: -3, top: d.outerH * 0.2, width: 4, height: d.outerH * 0.07, borderRadius: 2, backgroundColor: "#4a505a" }} />
       <div style={{ position: "absolute", left: -3, top: d.outerH * 0.3, width: 4, height: d.outerH * 0.07, borderRadius: 2, backgroundColor: "#4a505a" }} />
       <div style={{ position: "absolute", right: -3, top: d.outerH * 0.25, width: 4, height: d.outerH * 0.11, borderRadius: 2, backgroundColor: "#4a505a" }} />
-      {reflect && src ? (
-        <div
-          style={{
-            position: "absolute",
-            left: d.bezel,
-            top: d.outerH + 12,
-            width,
-            height: d.height,
-            borderRadius: d.radius,
-            overflow: "hidden",
-            transform: "scaleY(-1)",
-            opacity: 0.22,
-            WebkitMaskImage: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 38%)",
-          }}
-        >
-          <Img src={staticFile(src)} style={{ position: "absolute", left: 0, top: 0, width: imgW }} />
-        </div>
-      ) : null}
     </div>
   );
 };
 
 // ---------------------------------------------------------------- Laptop
 
-export const laptopDims = (width: number) => {
-  const bezel = Math.round(width * 0.02);
-  const screenW = width - bezel * 2;
-  const screenH = Math.round(screenW / 1.6);
-  const chin = Math.round(width * 0.012);
-  return {
-    bezel,
-    screenW,
-    screenH,
-    lidH: screenH + bezel * 2 + chin,
-    deckD: Math.round(width * 0.62),
-  };
-};
-
-/**
- * Aluminium laptop built from real 3D planes: a hinged lid (rotate with `lidAngle`,
- * -88 is closed, ~10 is open) and a keyboard deck lying flat towards the viewer.
- * `screen` is clipped to the display. `popout` shares the display's coordinates
- * but is not clipped, so children can lift off the glass with translateZ.
- */
-export const Laptop: React.FC<{
+/** Front-on laptop: black-bezel lid on an aluminium base. `screen` is clipped to the display. */
+export const LaptopFlat: React.FC<{
+  left: number;
+  top: number;
   width: number;
-  lidAngle?: number;
-  screenOn?: number;
+  bezel: number;
+  screenW: number;
+  screenH: number;
   screen: React.ReactNode;
-  popout?: React.ReactNode;
-  style?: React.CSSProperties;
-}> = ({ width, lidAngle = 10, screenOn = 1, screen, popout, style }) => {
-  const d = laptopDims(width);
-  const keyW = (width * 1.14 * 0.78) / 14;
-  const keyH = (d.deckD * 0.42) / 6;
+}> = ({ left, top, width, bezel, screenW, screenH, screen }) => {
+  const lidH = screenH + bezel * 2 + 10;
   return (
-    <div
-      style={{
-        position: "absolute",
-        width,
-        height: d.lidH,
-        transformStyle: "preserve-3d",
-        ...style,
-      }}
-    >
-      {/* Keyboard deck */}
+    <div style={{ position: "absolute", left, top, width, height: lidH + 30 }}>
       <div
         style={{
           position: "absolute",
-          left: -width * 0.07,
-          top: d.lidH,
-          width: width * 1.14,
-          height: d.deckD,
-          transformOrigin: "top center",
-          transform: "rotateX(90deg)",
-          borderRadius: "8px 8px 30px 30px",
-          background: "linear-gradient(180deg, #c3c7ce 0%, #e4e6ea 35%, #b9bdc4 100%)",
-          boxShadow: "inset 0 2px 0 rgba(255,255,255,0.7), 0 0 90px rgba(0,0,0,0.55)",
+          left: 0,
+          top: 0,
+          width,
+          height: lidH,
+          borderRadius: "26px 26px 10px 10px",
+          backgroundColor: "#0b0d11",
+          boxShadow: "inset 0 0 0 2px #2c3036, 0 40px 90px rgba(0,0,0,0.5)",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            left: "11%",
-            right: "11%",
-            top: d.deckD * 0.07,
-            height: d.deckD * 0.42,
-            borderRadius: 10,
-            backgroundColor: "#1d2026",
-            backgroundImage:
-              "linear-gradient(90deg, rgba(196,200,207,0.95) 2px, transparent 2px), linear-gradient(0deg, rgba(196,200,207,0.95) 2px, transparent 2px)",
-            backgroundSize: `${keyW}px ${keyH}px`,
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            left: "34%",
-            right: "34%",
-            top: d.deckD * 0.56,
-            height: d.deckD * 0.34,
-            borderRadius: 14,
-            background: "linear-gradient(180deg, #d6d9de, #c4c7cd)",
-            boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.08)",
-          }}
-        />
-      </div>
-
-      {/* Lid */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          transformOrigin: "bottom center",
-          transform: `rotateX(${lidAngle}deg)`,
-          transformStyle: "preserve-3d",
-        }}
-      >
-        {[1, 3, 5].map((z) => (
-          <div
-            key={z}
-            style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: "22px 22px 12px 12px",
-              background: "linear-gradient(160deg, #d9dce1, #a9aeb6)",
-              transform: `translateZ(${-z}px)`,
-            }}
-          >
-            {z === 5 ? (
-              <div
-                style={{
-                  position: "absolute",
-                  left: "50%",
-                  top: "50%",
-                  width: width * 0.06,
-                  height: width * 0.06,
-                  marginLeft: -width * 0.03,
-                  marginTop: -width * 0.03,
-                  borderRadius: width * 0.016,
-                  backgroundColor: "rgba(255,255,255,0.55)",
-                }}
-              />
-            ) : null}
-          </div>
-        ))}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            borderRadius: "22px 22px 12px 12px",
-            backgroundColor: "#0b0d11",
-            boxShadow: "inset 0 0 0 2px #2c3036",
-          }}
-        />
         <div
           style={{
             position: "absolute",
             left: "50%",
-            top: d.bezel * 0.35,
-            width: 7,
-            height: 7,
-            marginLeft: -3.5,
+            top: bezel * 0.35,
+            width: 8,
+            height: 8,
+            marginLeft: -4,
             borderRadius: "50%",
             backgroundColor: "#1f2a38",
           }}
@@ -298,40 +121,50 @@ export const Laptop: React.FC<{
         <div
           style={{
             position: "absolute",
-            left: d.bezel,
-            top: d.bezel,
-            width: d.screenW,
-            height: d.screenH,
+            left: bezel,
+            top: bezel,
+            width: screenW,
+            height: screenH,
             overflow: "hidden",
             borderRadius: 6,
-            backgroundColor: "#000",
-            transform: "translateZ(0.5px)",
+            backgroundColor: "#fff",
           }}
         >
           {screen}
-          <AbsoluteFill style={{ backgroundColor: "#000", opacity: 1 - screenOn, pointerEvents: "none" }} />
-          <AbsoluteFill
-            style={{
-              pointerEvents: "none",
-              background: "linear-gradient(125deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 35%)",
-            }}
-          />
-        </div>
-        {popout ? (
           <div
             style={{
               position: "absolute",
-              left: d.bezel,
-              top: d.bezel,
-              width: d.screenW,
-              height: d.screenH,
-              transformStyle: "preserve-3d",
-              transform: "translateZ(1px)",
+              inset: 0,
+              pointerEvents: "none",
+              background: "linear-gradient(125deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 35%)",
             }}
-          >
-            {popout}
-          </div>
-        ) : null}
+          />
+        </div>
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          left: -width * 0.06,
+          top: lidH,
+          width: width * 1.12,
+          height: 26,
+          borderRadius: "0 0 40px 40px / 0 0 18px 18px",
+          background: "linear-gradient(180deg, #f1f2f4 0%, #cdd0d6 45%, #9da2aa 100%)",
+          boxShadow: "0 34px 60px rgba(0,0,0,0.55)",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: 0,
+            width: width * 0.14,
+            marginLeft: -width * 0.07,
+            height: 9,
+            borderRadius: "0 0 10px 10px",
+            background: "linear-gradient(180deg, #b3b8bf, #d3d6db)",
+          }}
+        />
       </div>
     </div>
   );
