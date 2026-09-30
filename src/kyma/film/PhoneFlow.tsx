@@ -1,29 +1,18 @@
 import React from "react";
-import { AbsoluteFill, Img, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { Phone } from "../devices";
 import { COLORS, EASE, EASE_INOUT, EASE_POP, SANS, clamp01, kf, lerp, prog } from "../theme";
 import { AppIcon, CheckIcon } from "../ui";
 import {
   BAR_H,
-  CARD1,
-  CARD_LIFT,
-  K,
   MS,
   PD,
   PHONE_CX,
-  PHONE_HERO_H,
   PHONE_LEFT,
   PHONE_TOP,
-  PSX,
-  PSY,
   PW,
-  SCROLL_LISTINGS,
   SHEET_TOP,
-  SNAP,
   T,
-  camPoint,
-  camera,
-  pageToFrame,
 } from "./layout";
 import { CostsPane, VisaPane, YieldPane } from "./Sheet";
 
@@ -83,56 +72,13 @@ const segCenter = (i: number) => ({ x: 22 + SEG_W * (i + 0.5), y: SHEET_TOP + 28
 
 const ENQUIRE = { x: PW - 20 - 88, y: PD.height - BAR_H + 14 + 27 };
 
-/** Villa photo flying from the laptop's listing card into the phone's hero image. */
-export const FlyingPhoto: React.FC = () => {
-  const frame = useCurrentFrame();
-  if (frame < T.flyStart || frame > T.flyEnd + 8) {
-    return null;
-  }
-  const cam = camera(T.flyStart);
-  const a = camPoint(pageToFrame(CARD1.x, CARD1.y, SCROLL_LISTINGS), cam);
-  const sw = CARD1.w * K * cam.s;
-  const sh = CARD1.photoH * K * cam.s;
-  const sx = a.x + sw / 2;
-  const sy = a.y - CARD_LIFT * cam.s + sh / 2;
-  const ex = PSX + PW / 2;
-  const ey = PSY + PHONE_HERO_H / 2;
-  const t = prog(frame, T.flyStart, T.flyEnd - T.flyStart, SNAP);
-  const bump = 1 + 0.3 * Math.sin(Math.PI * t);
-  const w = lerp(sw, PW, t) * bump;
-  const h = lerp(sh, PHONE_HERO_H, t) * bump;
-  const r = lerp(10, PD.radius, t);
-  return (
-    <div
-      style={{
-        position: "absolute",
-        left: lerp(sx, ex, t) - w / 2,
-        top: lerp(sy, ey, t) - h / 2,
-        width: w,
-        height: h,
-        overflow: "hidden",
-        borderRadius: `${r}px ${r}px ${10 * (1 - t)}px ${10 * (1 - t)}px`,
-        rotate: `${-4 * Math.sin(Math.PI * t)}deg`,
-        opacity: 1 - prog(frame, T.flyEnd, 8),
-        boxShadow: `0 ${40 * Math.sin(Math.PI * t)}px 80px rgba(0,0,0,${0.5 * Math.sin(Math.PI * t)})`,
-      }}
-    >
-      <Img
-        src={staticFile("kyma/photos/villa.jpg")}
-        style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 62%" }}
-      />
-    </div>
-  );
-};
-
-/** The phone slides in, catches the photo, and the app gets used: legal checks, sheet tabs, enquiry. */
+/** The phone (formed by the morph) and the app being used: legal checks, sheet tabs, enquiry. */
 export const PhoneFlow: React.FC = () => {
   const frame = useCurrentFrame();
-  if (frame < T.flyStart || frame > T.endStart + 30) {
+  if (frame < T.morphEnd || frame > T.endStart + 30) {
     return null;
   }
-  const enter = prog(frame, T.flyStart + 2, T.flyEnd - T.flyStart - 2, EASE);
-  const float = Math.sin(frame / 30) * 5 * prog(frame, T.flyEnd + 10, 20);
+  const float = Math.sin((frame - T.morphEnd) / 30) * 5 * prog(frame, T.morphEnd + 6, 24);
   const exit = prog(frame, T.endStart, 24, EASE_INOUT);
 
   const sheetVis = prog(frame, T.sheetUp, 18, EASE_POP) - prog(frame, T.sheetDown, 14, EASE_INOUT);
@@ -163,7 +109,7 @@ export const PhoneFlow: React.FC = () => {
     <AbsoluteFill>
       <AbsoluteFill
         style={{
-          translate: `${(1 - enter) * 1100}px ${float + exit * 160}px`,
+          translate: `0px ${float + exit * 160}px`,
           scale: String(1 - 0.12 * exit),
           opacity: 1 - exit,
         }}

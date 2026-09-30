@@ -6,29 +6,28 @@ export const FILM_FRAMES = 600;
 
 /** Every beat of the 20-second film, in frames at 30 fps. */
 export const T = {
-  hookOut: 36,
-  zoomStart: 42,
-  zoomEnd: 76,
-  cursorIn: 78,
-  chipClick: 98,
-  searchClick: 112,
-  scrollStart: 116,
-  scrollEnd: 146,
-  cardHover: 154,
-  cardClick: 164,
-  flyStart: 168,
-  flyEnd: 204,
-  legal: 212,
-  tapYield: 258,
-  sheetUp: 263,
-  tapCosts: 304,
-  tapVisa: 348,
-  sheetDown: 390,
-  barUp: 398,
-  tapEnquire: 420,
-  notif: 430,
+  cursorIn: 6,
+  chipClick: 26,
+  searchClick: 40,
+  scrollStart: 44,
+  scrollEnd: 72,
+  cardHover: 80,
+  cardClick: 90,
+  navStart: 94,
+  navEnd: 114,
+  morphStart: 144,
+  morphEnd: 182,
+  legal: 190,
+  tapYield: 240,
+  sheetUp: 245,
+  tapCosts: 292,
+  tapVisa: 340,
+  sheetDown: 386,
+  barUp: 394,
+  tapEnquire: 416,
+  notif: 426,
   endStart: 476,
-};
+}
 
 /** Punchy camera move: quick start, long soft landing. */
 export const SNAP = Easing.bezier(0.7, 0, 0.15, 1);
@@ -69,6 +68,13 @@ export const K = SCREEN_W / 2560;
 export const SCROLL_TOP = 40;
 export const SCROLL_LISTINGS = 1850;
 
+/** Scroll of the desktop listing page after it opens (screenshot pixels). */
+export const listingScroll = (frame: number) =>
+  kfe(frame, [
+    { at: T.navEnd + 2, value: 0 },
+    { at: T.morphStart + 6, value: 150, ease: EASE_INOUT },
+  ]);
+
 export const pageScroll = (frame: number) =>
   kfe(frame, [
     { at: T.scrollStart, value: SCROLL_TOP },
@@ -81,20 +87,16 @@ export const pageToFrame = (ox: number, oy: number, scroll: number) => ({
   y: SY + (oy - scroll) * K,
 });
 
-// The aerial hero photo on the home page, which the film opens on.
-const HERO = pageToFrame(1262, 1325, SCROLL_TOP);
-const linear = (t: number) => t;
-
 const CAM: { at: number; s: number; fx: number; fy: number; ease?: (t: number) => number }[] = [
-  { at: 0, s: 2.95, fx: HERO.x - 30, fy: HERO.y },
-  { at: T.zoomStart, s: 2.75, fx: HERO.x + 12, fy: HERO.y, ease: linear },
-  { at: T.zoomEnd, s: 1, fx: 960, fy: 511, ease: SNAP },
-  { at: T.cursorIn + 2, s: 1, fx: 960, fy: 511 },
-  { at: T.chipClick - 6, s: 1.45, fx: 1020, fy: 482, ease: SNAP },
-  { at: T.scrollStart, s: 1.45, fx: 1020, fy: 482 },
+  { at: 0, s: 1.04, fx: 960, fy: 511 },
+  { at: T.cursorIn + 8, s: 1, fx: 960, fy: 511, ease: EASE },
+  { at: T.chipClick - 4, s: 1.4, fx: 1030, fy: 470, ease: SNAP },
+  { at: T.scrollStart, s: 1.4, fx: 1030, fy: 470 },
   { at: T.scrollEnd, s: 1.12, fx: 960, fy: 470 },
-  { at: T.cardHover - 8, s: 1.12, fx: 960, fy: 470 },
-  { at: T.cardHover + 6, s: 1.3, fx: 620, fy: 400, ease: EASE },
+  { at: T.cardHover - 6, s: 1.12, fx: 960, fy: 470 },
+  { at: T.cardHover + 6, s: 1.28, fx: 640, fy: 400, ease: EASE },
+  { at: T.navStart + 2, s: 1.28, fx: 640, fy: 400 },
+  { at: T.navEnd, s: 1, fx: 960, fy: 511, ease: SNAP },
 ];
 
 export const camera = (frame: number) => ({
@@ -108,8 +110,8 @@ export const camPoint = (p: { x: number; y: number }, cam: { s: number; fx: numb
   y: 540 + (p.y - cam.fy) * cam.s,
 });
 
-// Listing card 1 on the home page (screenshot pixels) and its photo area.
-export const CARD1 = { x: 64, y: 2055, w: 582, h: 625, photoH: 352 };
+// Listing card 1 on the home page (screenshot pixels).
+export const CARD1 = { x: 64, y: 2055, w: 582, h: 625 };
 export const CARD_LIFT = 8;
 
 // ---------------------------------------------------------------- Phone
@@ -124,7 +126,6 @@ export const PSX = PHONE_LEFT + PD.bezel;
 export const PSY = PHONE_TOP + PD.bezel;
 /** Mobile screenshot pixels → phone screen pixels. */
 export const MS = PD.imgScale;
-export const PHONE_HERO_H = 625 * MS;
 
 export const SHEET_TOP = 350;
 export const BAR_H = 112;
