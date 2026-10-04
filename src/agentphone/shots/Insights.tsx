@@ -19,11 +19,11 @@ const V: Key[] = [
 
 // 0:23–0:25 · Insights. Hard cut on the beat; answer rate counts to 86%,
 // the hour bars and sparkline draw.
-export const InsightsShot: React.FC = () => {
+export const InsightsShot: React.FC<{ camH?: Key[]; camV?: Key[] }> = ({ camH = H, camV = V }) => {
   const v = useVertical();
   return (
     <PaperStage>
-      <Framed w={1280} h={1010} box={deskBox(v)} cam={v ? V : H}>
+      <Framed w={1280} h={1010} box={deskBox(v)} cam={v ? camV : camH}>
         <div style={{ borderRadius: 24, boxShadow: "0 50px 100px -40px rgba(16,74,52,.45)" }}>
           <Lead>
             <InsightsScreen />

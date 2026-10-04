@@ -1,13 +1,39 @@
 // Auto-converted from AgentPhone Motion Brief.html (data-shot="live"), 390x844.
 import React from "react";
-import {Mark, Ripple, Timer} from "../lib/bits";
+import {Mark, Ripple, Timer, Typed} from "../lib/bits";
 import {interpolate} from "remotion";
 import {useT} from "../lib/time";
 import {pulse} from "../lib/anim";
 import {Amb} from "../lib/Amb";
 import {A} from "../lib/A";
 
-export const LiveScreen: React.FC<{endAt?: number}> = ({endAt}) => {
+// Live mode: each line is written out as it's spoken.
+const CPS = 34;
+const lineDur = (chars: number) => Math.ceil((chars / CPS) * 30);
+export const TYPING = {l1: 12, l1Len: 75, l2: 86, l3: 157, l3Len: 49, listen: 205, actions: 202};
+
+const BUBBLE_THEM: React.CSSProperties = {fontSize: "14px", lineHeight: "1.5", color: "#1f3a2e", borderRadius: "16px", borderTopLeftRadius: "5px", padding: "10px 13px", display: "inline-block", maxWidth: "90%", background: "linear-gradient(150deg,rgba(255,255,255,.72),rgba(255,255,255,.48))", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,.7)"};
+const BUBBLE_YOU: React.CSSProperties = {fontSize: "14px", lineHeight: "1.5", color: "#fff", borderRadius: "16px", borderTopRightRadius: "5px", padding: "10px 13px", display: "inline-block", maxWidth: "90%", textAlign: "left", background: "linear-gradient(160deg,#10c46e,#0a8f4e)", boxShadow: "0 6px 16px -8px rgba(12,154,85,.6)"};
+
+/** A transcript line. When typing, it appears as it's spoken and writes itself out. */
+const Line: React.FC<{who: "JAMES" | "YOU"; at: number; typing: boolean; text: string; children: React.ReactNode}> = ({who, at, typing, text, children}) => {
+  const f = useT();
+  if (typing && f < at) return null;
+  const done = at + lineDur(text.length);
+  const you = who === "YOU";
+  return (
+    <A as="div" fx="enter" at={at} style={you ? {textAlign: "right"} : undefined}>
+      <div style={{fontSize: "10.5px", fontWeight: "700", color: you ? "#0c6b43" : "#5d7468", marginBottom: "3px", ...(you ? {marginRight: "2px"} : {marginLeft: "2px"})}}>
+        {who}
+      </div>
+      <div style={you ? BUBBLE_YOU : BUBBLE_THEM}>
+        {typing && f < done ? <Typed text={text} at={at} cps={CPS} caret caretColor={you ? "#fff" : "#0c9a55"} /> : children}
+      </div>
+    </A>
+  );
+};
+
+export const LiveScreen: React.FC<{endAt?: number; typing?: boolean}> = ({endAt, typing = false}) => {
   const f = useT();
   const press = endAt === undefined ? 1 : interpolate(f, [endAt - 3, endAt, endAt + 8], [1, 0.94, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
   return (
@@ -119,31 +145,17 @@ export const LiveScreen: React.FC<{endAt?: number}> = ({endAt}) => {
             </div>
           </A>
           <div style={{flex: "1", minHeight: "0", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: "11px"}}>
-            <A as="div" fx="enter" at={7}>
-              <div style={{fontSize: "10.5px", fontWeight: "700", color: "#5d7468", marginBottom: "3px", marginLeft: "2px"}}>
-                JAMES
-              </div>
-              <div style={{fontSize: "14px", lineHeight: "1.5", color: "#1f3a2e", borderRadius: "16px", borderTopLeftRadius: "5px", padding: "10px 13px", display: "inline-block", maxWidth: "90%", background: "linear-gradient(150deg,rgba(255,255,255,.72),rgba(255,255,255,.48))", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,.7)"}}>
-                Is the Marlowe place still open <Mark at={13}>Saturday</Mark>? I'd love to bring my wife through.
-              </div>
-            </A>
-            <A as="div" fx="enter" at={16} style={{textAlign: "right"}}>
-              <div style={{fontSize: "10.5px", fontWeight: "700", color: "#0c6b43", marginBottom: "3px", marginRight: "2px"}}>
-                YOU
-              </div>
-              <div style={{fontSize: "14px", lineHeight: "1.5", color: "#fff", borderRadius: "16px", borderTopRightRadius: "5px", padding: "10px 13px", display: "inline-block", maxWidth: "90%", textAlign: "left", background: "linear-gradient(160deg,#10c46e,#0a8f4e)", boxShadow: "0 6px 16px -8px rgba(12,154,85,.6)"}}>
-                Absolutely — ten to ten-thirty. I'll lock you in and send the brochure now.
-              </div>
-            </A>
-            <A as="div" fx="enter" at={25}>
-              <div style={{fontSize: "10.5px", fontWeight: "700", color: "#5d7468", marginBottom: "3px", marginLeft: "2px"}}>
-                JAMES
-              </div>
-              <div style={{fontSize: "14px", lineHeight: "1.5", color: "#1f3a2e", borderRadius: "16px", borderTopLeftRadius: "5px", padding: "10px 13px", display: "inline-block", maxWidth: "90%", background: "linear-gradient(150deg,rgba(255,255,255,.72),rgba(255,255,255,.48))", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,.7)"}}>
-                Perfect. And what was the <Mark at={31}>body-corp</Mark> figure again?
-              </div>
-            </A>
-            <A as="div" fx="enter" at={33}>
+            <Line who="JAMES" at={typing ? TYPING.l1 : 7} typing={typing} text="Is the Marlowe place still open Saturday? I'd love to bring my wife through.">
+              Is the Marlowe place still open <Mark at={typing ? TYPING.l1 + lineDur(TYPING.l1Len) : 13}>Saturday</Mark>? I'd love to bring my wife through.
+            </Line>
+            <Line who="YOU" at={typing ? TYPING.l2 : 16} typing={typing} text="Absolutely — ten to ten-thirty. I'll lock you in and send the brochure now.">
+              Absolutely — ten to ten-thirty. I'll lock you in and send the brochure now.
+            </Line>
+            <Line who="JAMES" at={typing ? TYPING.l3 : 25} typing={typing} text="Perfect. And what was the body-corp figure again?">
+              Perfect. And what was the <Mark at={typing ? TYPING.l3 + lineDur(TYPING.l3Len) : 31}>body-corp</Mark> figure again?
+            </Line>
+            {typing && f < TYPING.listen ? null : (
+            <A as="div" fx="enter" at={typing ? TYPING.listen : 33}>
               <div style={{fontSize: "10.5px", fontWeight: "700", color: "#9aa8a1", marginBottom: "3px", marginLeft: "2px", display: "flex", alignItems: "center", gap: "5px"}}>
                 {"JAMES "}
                 <span style={{fontSize: "9px", fontWeight: "600", color: "#0c6b43"}}>
@@ -155,10 +167,11 @@ export const LiveScreen: React.FC<{endAt?: number}> = ({endAt}) => {
                 <Amb as="div" kind="ccShimmer" dur={1.2} style={{height: "8px", borderRadius: "4px", background: "linear-gradient(90deg,rgba(16,196,110,.12) 25%,rgba(16,196,110,.28) 50%,rgba(16,196,110,.12) 75%)", backgroundSize: "180px 100%", width: "55%"}} />
               </div>
             </A>
+            )}
           </div>
         </div>
         <div style={{overflow: "hidden", maxHeight: "140px"}}>
-          <A as="div" fx="pop" at={38} style={{margin: "0 22px 14px", flex: "none", borderRadius: "16px", padding: "12px 14px", display: "flex", gap: "11px", alignItems: "center", background: "linear-gradient(150deg,rgba(16,196,110,.22),rgba(16,196,110,.08))", backdropFilter: "blur(16px)", border: "1px solid rgba(16,196,110,.4)", boxShadow: "0 8px 22px -10px rgba(12,154,85,.4),inset 0 1px 0 rgba(255,255,255,.5)"}}>
+          <A as="div" fx="pop" at={typing ? TYPING.actions : 38} style={{margin: "0 22px 14px", flex: "none", borderRadius: "16px", padding: "12px 14px", display: "flex", gap: "11px", alignItems: "center", background: "linear-gradient(150deg,rgba(16,196,110,.22),rgba(16,196,110,.08))", backdropFilter: "blur(16px)", border: "1px solid rgba(16,196,110,.4)", boxShadow: "0 8px 22px -10px rgba(12,154,85,.4),inset 0 1px 0 rgba(255,255,255,.5)"}}>
             <div style={{width: "26px", height: "26px", borderRadius: "8px", background: "linear-gradient(180deg,#10c46e,#0a8f4e)", display: "flex", alignItems: "center", justifyContent: "center", flex: "none"}}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff">
                 <path d="M12 2l1.9 5.2L19 9l-5.1 1.8L12 16l-1.9-5.2L5 9l5.1-1.8L12 2z" />

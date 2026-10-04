@@ -1,8 +1,8 @@
 // Auto-converted from AgentPhone Motion Brief.html (data-shot="after"), 390x844.
-import {useT} from "../lib/time";
+import {Shift, useT} from "../lib/time";
 import React from "react";
 import {fade} from "../lib/anim";
-import {CheckDraw, Ripple} from "../lib/bits";
+import {CheckDraw, Ripple, Typed} from "../lib/bits";
 import {interpolate} from "remotion";
 import {Amb} from "../lib/Amb";
 import {A} from "../lib/A";
@@ -10,7 +10,26 @@ import {A} from "../lib/A";
 export const S1 = 18;
 export const LOGGED = 62;
 
-export const AfterScreen: React.FC<{sendAt?: number}> = ({sendAt}) => {
+const SUMMARY = "James confirmed he wants to bring his wife to the Saturday inspection at 14 Marlowe Cr (10\u201310:30am). He's pre-approved and keen, but his broker needs the body-corp figure \u2014 you quoted $1,180/quarter. Warm lead; likely to offer if the inspection goes well.";
+
+// Think mode: a beat of "summarising", then the summary writes itself out fast.
+export const THINK = {write: 46, cps: 120, done: 46 + Math.ceil((SUMMARY.length / 120) * 30), delay: 76};
+
+const Thinking: React.FC = () => {
+  const f = useT();
+  const shimmer: React.CSSProperties = {height: 9, borderRadius: 5, background: "linear-gradient(90deg,rgba(16,196,110,.12) 25%,rgba(16,196,110,.3) 50%,rgba(16,196,110,.12) 75%)", backgroundSize: "180px 100%"};
+  const dots = ".".repeat(1 + (Math.floor(f / 6) % 3));
+  return (
+    <div style={{display: "flex", flexDirection: "column", gap: 9, paddingTop: 2}}>
+      <div style={{fontSize: 13, fontWeight: 600, color: "#0c6b43"}}>Summarising the call{dots}</div>
+      <Amb as="div" kind="ccShimmer" dur={1.2} style={{...shimmer, width: "96%"}} />
+      <Amb as="div" kind="ccShimmer" dur={1.2} style={{...shimmer, width: "88%"}} />
+      <Amb as="div" kind="ccShimmer" dur={1.2} style={{...shimmer, width: "62%"}} />
+    </div>
+  );
+};
+
+export const AfterScreen: React.FC<{sendAt?: number; think?: boolean}> = ({sendAt, think = false}) => {
   const f = useT();
   return (
   <div style={{position: "relative", width: 390, height: 844, overflow: "hidden"}}>
@@ -62,6 +81,12 @@ export const AfterScreen: React.FC<{sendAt?: number}> = ({sendAt}) => {
             </span>
           </div>
           <div style={{fontSize: "14.5px", lineHeight: "1.55", color: "#3f5249", marginTop: "11px"}}>
+            {think && f < THINK.write ? (
+              <Thinking />
+            ) : think && f < THINK.done ? (
+              <Typed text={SUMMARY} at={THINK.write} cps={THINK.cps} caret />
+            ) : (
+              <>
             <span style={fade(f, S1, 8)}>
             {"James confirmed he wants to bring his wife to the "}
             <b style={{color: "#16241d"}}>
@@ -79,8 +104,11 @@ export const AfterScreen: React.FC<{sendAt?: number}> = ({sendAt}) => {
             <span style={fade(f, S1 + 14, 8)}>
             Warm lead; likely to offer if the inspection goes well.
             </span>
+              </>
+            )}
           </div>
         </A>
+        <Shift by={think ? THINK.delay : 0}>
         <A as="div" fx="enter" at={34} style={{margin: "18px 22px 10px", flex: "none", fontFamily: "'Geist Mono',monospace", fontSize: "11px", letterSpacing: ".14em", color: "#5d7468", fontWeight: "600"}}>
           ACTION ITEMS · 3
         </A>
@@ -156,6 +184,7 @@ export const AfterScreen: React.FC<{sendAt?: number}> = ({sendAt}) => {
             </svg>
           </div>
         </A>
+        </Shift>
       </div>
     </div>
   </div>

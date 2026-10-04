@@ -13,7 +13,7 @@ const acceptScale = (f: number, TAP: number) =>
     ? 1 + 0.05 * pulse(f, 24, 18)
     : interpolate(f, [TAP - 3, TAP, TAP + 8], [1, 0.9, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
 
-export const IncomingScreen: React.FC<{tap?: number}> = ({tap = TAP}) => {
+export const IncomingScreen: React.FC<{tap?: number; ripple?: boolean}> = ({tap = TAP, ripple = true}) => {
   const f = useT();
   return (
   <div style={{position: "relative", width: 390, height: 844, overflow: "hidden"}}>
@@ -98,7 +98,7 @@ export const IncomingScreen: React.FC<{tap?: number}> = ({tap = TAP}) => {
           </A>
           <A as="div" fx="rise" at={17} style={{display: "flex", flexDirection: "column", alignItems: "center", gap: "9px"}}>
             <div style={{scale: acceptScale(f, tap), position: "relative", width: "82px", height: "82px", borderRadius: "50%", background: "linear-gradient(180deg,#10c46e,#0a8f4e)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 16px 36px -10px rgba(12,154,85,.65),inset 0 1px 0 rgba(255,255,255,.4)"}}>
-              <Ripple at={tap} size={82} />
+              {ripple ? <Ripple at={tap} size={82} /> : null}
               <svg width="34" height="34" viewBox="0 0 24 24" fill="#fff">
                 <path d="M19.6 21c-2.3 0-4.6-.6-6.9-1.7-2.2-1.1-4.2-2.6-6-4.4-1.8-1.8-3.3-3.8-4.4-6C1.2 6.7.6 4.4.6 2.1c0-.4.1-.7.4-1C1.3.8 1.6.7 2 .7h3.3c.3 0 .6.1.8.3.2.2.4.5.4.8.1.8.3 1.6.6 2.4.2.5.1 1-.3 1.4L5.6 8.1c1.2 2.2 2.9 3.9 5.1 5.1l1.7-1.7c.4-.4.9-.5 1.4-.3.8.3 1.6.5 2.4.6.3 0 .6.2.8.4.2.2.3.5.3.8V19c0 .4-.1.7-.4 1-.3.3-.6.4-1 .4z" />
               </svg>
