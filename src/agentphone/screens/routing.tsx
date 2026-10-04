@@ -54,7 +54,7 @@ const CallToken: React.FC = () => {
       <svg width="900" height="600" style={{position: "absolute", left: 0, top: 0, zIndex: 2, overflow: "visible"}}>
         <polyline points={pts.join(" ")} fill="none" stroke="#10c46e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      <div style={{position: "absolute", left: x - 9, top: y - 9, width: 18, height: 18, borderRadius: "50%", zIndex: 4, opacity: prog(f, TOKEN - 4, 4) * (1 - prog(f, LANDED + 6, 6)),
+      <div style={{position: "absolute", left: x - 9, top: y - 9, width: 18, height: 18, borderRadius: "50%", zIndex: 4, opacity: prog(f, TOKEN - 4, 4),
         background: "radial-gradient(circle at 35% 35%,#7df0b6,#0c9a55)", boxShadow: "0 0 0 5px rgba(16,196,110,.25), 0 0 22px 6px rgba(16,196,110,.55)"}}>
         {ring ? <Amb as="span" kind="ccRing" dur={0.5} style={{position: "absolute", inset: -8, borderRadius: "50%", background: "rgba(245,158,11,.55)"}} /> : null}
       </div>

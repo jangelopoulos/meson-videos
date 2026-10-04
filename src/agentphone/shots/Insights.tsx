@@ -1,4 +1,5 @@
 import React from "react";
+import { Lead } from "../lib/time";
 import { deskBox, Framed, Key, PaperStage, useVertical } from "../lib/stage";
 import { InsightsScreen } from "../screens/insights";
 
@@ -24,7 +25,9 @@ export const InsightsShot: React.FC = () => {
     <PaperStage>
       <Framed w={1280} h={1010} box={deskBox(v)} cam={v ? V : H}>
         <div style={{ borderRadius: 24, boxShadow: "0 50px 100px -40px rgba(16,74,52,.45)" }}>
-          <InsightsScreen />
+          <Lead>
+            <InsightsScreen />
+          </Lead>
         </div>
       </Framed>
     </PaperStage>

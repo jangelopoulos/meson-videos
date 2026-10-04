@@ -2,14 +2,15 @@
 import {useT} from "../lib/time";
 import React from "react";
 import {fade} from "../lib/anim";
-import {CheckDraw} from "../lib/bits";
+import {CheckDraw, Ripple} from "../lib/bits";
+import {interpolate} from "remotion";
 import {Amb} from "../lib/Amb";
 import {A} from "../lib/A";
 
 export const S1 = 18;
 export const LOGGED = 62;
 
-export const AfterScreen: React.FC = () => {
+export const AfterScreen: React.FC<{sendAt?: number}> = ({sendAt}) => {
   const f = useT();
   return (
   <div style={{position: "relative", width: 390, height: 844, overflow: "hidden"}}>
@@ -112,7 +113,8 @@ export const AfterScreen: React.FC = () => {
                 14 Marlowe Cr · PDF · AI drafted
               </div>
             </div>
-            <div style={{fontSize: "13px", fontWeight: "700", color: "#fff", background: "linear-gradient(180deg,#10c46e,#0c9a55)", borderRadius: "11px", padding: "8px 14px", boxShadow: "0 6px 14px -6px rgba(12,154,85,.5)"}}>
+            <div style={{position: "relative", scale: `${sendAt === undefined ? 1 : interpolate(f, [sendAt - 3, sendAt, sendAt + 8], [1, 0.88, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"})}`, fontSize: "13px", fontWeight: "700", color: "#fff", background: "linear-gradient(180deg,#10c46e,#0c9a55)", borderRadius: "11px", padding: "8px 14px", boxShadow: "0 6px 14px -6px rgba(12,154,85,.5)"}}>
+              {sendAt === undefined ? null : <Ripple at={sendAt} size={40} />}
               Send
             </div>
           </A>

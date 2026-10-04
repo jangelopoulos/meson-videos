@@ -79,7 +79,7 @@ export const DialerShot: React.FC = () => {
                 <path d={HANDSET} fill={C.callLayer} transform="translate(9.5 9.5) scale(.95)" />
               </svg>
             </div>
-            {pillBars(f).map((b, i) => {
+            {pillBars(f + 87).map((b, i) => {
               const bh = pd * (0.25 + 0.3 * b);
               return (
                 <div

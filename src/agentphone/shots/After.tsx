@@ -1,4 +1,5 @@
 import {useT} from "../lib/time";
+import { Cam } from "../lib/transition";
 import React from "react";
 import {Easing, interpolate} from "remotion";
 import { prog } from "../lib/anim";
@@ -11,7 +12,7 @@ export const FLY = 104; // the summary row lifts, then flies out to the right
 
 // 0:07–0:11 · After the call. Music drop. Hold "logged" 1.5s, then the row
 // flies out toward the desktop.
-export const AfterShot: React.FC<{ flyOut?: boolean }> = ({ flyOut = true }) => {
+export const AfterShot: React.FC<{ flyOut?: boolean; sendAt?: number; camFrom?: Cam }> = ({ flyOut = true, sendAt, camFrom }) => {
   const f = useT();
   const v = useVertical();
   const lift = prog(f, FLY, 8);
@@ -28,12 +29,12 @@ export const AfterShot: React.FC<{ flyOut?: boolean }> = ({ flyOut = true }) => 
         box={phoneBox(v)}
         damp={v}
         cam={[
-          { f: 0, x: PHONE_W / 2, y: PHONE_H / 2, z: 1 },
+          camFrom ? { f: 0, ...camFrom } : { f: 0, x: PHONE_W / 2, y: PHONE_H / 2, z: 1 },
           { f: 90, x: PHONE_W / 2, y: 380, z: 1.07 },
         ]}
       >
         <Phone>
-          <AfterScreen />
+          <AfterScreen sendAt={sendAt} />
           <CollapsingWave />
         </Phone>
         {flyOut && f >= FLY ? (

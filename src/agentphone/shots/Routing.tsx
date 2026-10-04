@@ -1,5 +1,5 @@
-import {useT} from "../lib/time";
-import React from "react";
+import React, { useContext } from "react";
+import { Lead, LeadCtx, useT } from "../lib/time";
 import { enter } from "../lib/anim";
 import { deskBox, Framed, Key, PaperStage, useVertical } from "../lib/stage";
 import { LANDED, RoutingScreen, TOKEN } from "../screens/routing";
@@ -30,8 +30,10 @@ export const RoutingShot: React.FC = () => {
   return (
     <PaperStage>
       <Framed w={1280} h={940} box={deskBox(v)} cam={v ? V : H}>
-        <div style={{ ...enter(f, 0, 12), borderRadius: 24, boxShadow: "0 50px 100px -40px rgba(16,74,52,.45)" }}>
-          <RoutingScreen />
+        <div style={{ ...(useContext(LeadCtx) ? {} : enter(f, 0, 12)), borderRadius: 24, boxShadow: "0 50px 100px -40px rgba(16,74,52,.45)" }}>
+          <Lead>
+            <RoutingScreen />
+          </Lead>
         </div>
       </Framed>
     </PaperStage>

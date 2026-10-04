@@ -10,7 +10,7 @@ import {Amb} from "../lib/Amb";
 export const D = 22; // dialer content starts once the pill has opened
 export const TYPE = 60;
 export const MATCH = 84;
-export const CALL = 108;
+export const CALL = 122;
 
 export const DialerScreen: React.FC = () => {
   const f = useT();

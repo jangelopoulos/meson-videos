@@ -20,19 +20,23 @@ const ringHalo = (f: number, at: number) => {
 
 // 0:00–0:03 · The handset circle stretches into the pill, rings twice
 // (amber halo), then opens into the wordmark.
-export const LogoShot: React.FC = () => {
+export const LogoShot: React.FC<{ endPill?: boolean }> = ({ endPill = false }) => {
   const f = useT();
   const { width, height } = useVideoConfig();
   const v = height > width;
   const fs = v ? 150 : 200;
   const stretch = prog(f, 2, 11, EASE_POP);
-  const open = prog(f, OPEN, 16, Easing.inOut(Easing.cubic));
-  const pill = stretch * (1 - prog(f, OPEN - 2, 14, Easing.inOut(Easing.cubic)));
+  const open0 = prog(f, OPEN, 16, Easing.inOut(Easing.cubic));
+  // 60s cut: letters retract and the circle stretches back into the pill,
+  // which drops into the dialer in the next shot.
+  const back = endPill ? prog(f, 72, 14, Easing.inOut(Easing.cubic)) : 0;
+  const pill = Math.max(stretch * (1 - prog(f, OPEN - 2, 14, Easing.inOut(Easing.cubic))), back);
   const shake = (at: number) => {
     const t = f - at;
     return t >= 0 && t < 12 ? 4 * Math.sin(t * 2.4) * (1 - t / 12) : 0;
   };
-  const push = interpolate(f, [OPEN + 10, 87], [1, 1.035], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const open = open0 * (1 - back);
+  const push = 1 + (interpolate(f, [OPEN + 10, 87], [1, 1.035], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) - 1) * (1 - back);
   return (
     <AbsoluteFill style={{ background: C.callLayer }}>
       <AbsoluteFill style={{ scale: `${push}` }}>

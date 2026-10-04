@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
+import { Lead, StageClock, useT } from "./time";
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import { EASE_CAM } from "./anim";
-import { useT } from "./time";
 import { ambStyle } from "./Amb";
 import { C } from "../theme";
 
@@ -73,7 +73,7 @@ export const Framed: React.FC<{
 
 /** Dark call layer with dimmed aurora that never stops drifting. */
 export const DarkStage: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const f = useCurrentFrame();
+  const f = useCurrentFrame() + useContext(StageClock);
   const { fps } = useVideoConfig();
   const t = f / fps;
   return (
@@ -88,7 +88,7 @@ export const DarkStage: React.FC<{ children?: React.ReactNode }> = ({ children }
 
 /** Paper ground with the morning-water aurora. */
 export const PaperStage: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-  const f = useCurrentFrame();
+  const f = useCurrentFrame() + useContext(StageClock);
   const { fps } = useVideoConfig();
   const t = f / fps;
   return (
@@ -152,7 +152,7 @@ export const Phone: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     }}
   >
     <div style={{ width: 390, height: 844, borderRadius: 46, overflow: "hidden", position: "relative" }}>
-      {children}
+      <Lead>{children}</Lead>
     </div>
   </div>
 );

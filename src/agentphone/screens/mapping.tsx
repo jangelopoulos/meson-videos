@@ -2,13 +2,14 @@
 import React from "react";
 import {useT} from "../lib/time";
 import {draw, prog, pulse} from "../lib/anim";
-import {CheckDraw} from "../lib/bits";
+import {CheckDraw, Ripple} from "../lib/bits";
+import {interpolate} from "remotion";
 import {A} from "../lib/A";
 
 export const ROW0 = 26; // first mapping row
 export const STEP = 12; // 1.0 speed: each row fully resolves before the next
 
-export const MappingScreen: React.FC = () => {
+export const MappingScreen: React.FC<{pressAt?: number}> = ({pressAt}) => {
   const f = useT();
   return (
   <div style={{position: "relative", width: 390, height: 844, overflow: "hidden"}}>
@@ -189,7 +190,8 @@ export const MappingScreen: React.FC = () => {
           </A>
         </div>
         <div style={{flex: "none", padding: "14px 22px 26px", display: "flex", flexDirection: "column", gap: "8px"}}>
-          <A as="span" fx="rise" at={ROW0 + 4 * STEP + 22} style={{display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", borderRadius: "13px", padding: "12px 20px", fontWeight: "700", fontSize: "14px", background: "linear-gradient(180deg,#10c46e,#0c9a55)", color: "#fff", boxShadow: "0 10px 22px -8px rgba(12,154,85,.55),inset 0 1px 0 rgba(255,255,255,.4)", width: "100%"}}>
+          <A as="span" fx="rise" at={ROW0 + 4 * STEP + 22} extra={pressAt === undefined ? undefined : {scale: `${interpolate(f, [pressAt - 3, pressAt, pressAt + 8], [1, 0.94, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"})}`}} style={{position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "8px", borderRadius: "13px", padding: "12px 20px", fontWeight: "700", fontSize: "14px", background: "linear-gradient(180deg,#10c46e,#0c9a55)", color: "#fff", boxShadow: "0 10px 22px -8px rgba(12,154,85,.55),inset 0 1px 0 rgba(255,255,255,.4)", width: "100%"}}>
+            {pressAt === undefined ? null : <Ripple at={pressAt} size={46} />}
             Continue to activity
           </A>
         </div>

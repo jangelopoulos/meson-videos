@@ -6,7 +6,7 @@ import { MappingScreen, ROW0, STEP } from "../screens/mapping";
 
 // 0:47–0:51 · Connect a CRM. Played at 1.0 speed, as the brief asks: each
 // row resolves before the next. Gentle push into the field mapping.
-export const MappingShot: React.FC = () => {
+export const MappingShot: React.FC<{ pressAt?: number }> = ({ pressAt }) => {
   const f = useT();
   const v = useVertical();
   return (
@@ -24,7 +24,7 @@ export const MappingShot: React.FC = () => {
       >
         <div style={pop(f, 0, 0.94)}>
           <Phone>
-            <MappingScreen />
+            <MappingScreen pressAt={pressAt} />
           </Phone>
         </div>
       </Framed>

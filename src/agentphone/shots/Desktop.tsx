@@ -1,6 +1,6 @@
 import {useT} from "../lib/time";
 import React from "react";
-import { enter } from "../lib/anim";
+import { enter, pop } from "../lib/anim";
 import { deskBox, Framed, Key, PaperStage, useVertical } from "../lib/stage";
 import { CALLBACK, DesktopScreen, QUERY } from "../screens/desktop";
 
@@ -32,7 +32,10 @@ const V: Key[] = [
 
 // 0:11–0:17 · Desktop · Today. The after-call row lands, then the camera
 // tours calendar → unanswered → list builder and pulls out.
-export const DesktopShot: React.FC = () => {
+/** Sophie's "Call back" on the board: where the call token emerges. */
+export const CALLBACK_PT: [number, number] = [882, 158];
+
+export const DesktopShot: React.FC<{ tokenAt?: number }> = ({ tokenAt }) => {
   const f = useT();
   const v = useVertical();
   return (
@@ -47,7 +50,30 @@ export const DesktopShot: React.FC = () => {
         >
           <DesktopScreen />
         </div>
+        {tokenAt !== undefined && f >= tokenAt ? <Token at={tokenAt} /> : null}
       </Framed>
     </PaperStage>
+  );
+};
+
+/** A green call token pops out of "Call back": it leads into routing. */
+const Token: React.FC<{ at: number }> = ({ at }) => {
+  const f = useT();
+  const p = pop(f, at, 0.3);
+  const glow = 0.5 + 0.5 * Math.sin((f - at) * 0.5);
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: CALLBACK_PT[0] - 11,
+        top: CALLBACK_PT[1] - 11,
+        width: 22,
+        height: 22,
+        borderRadius: "50%",
+        background: "radial-gradient(circle at 35% 35%,#7df0b6,#0c9a55)",
+        boxShadow: `0 0 0 ${5 + 3 * glow}px rgba(16,196,110,.25), 0 0 26px 8px rgba(16,196,110,.55)`,
+        ...p,
+      }}
+    />
   );
 };

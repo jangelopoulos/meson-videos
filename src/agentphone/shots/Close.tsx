@@ -9,7 +9,7 @@ export const CLOSE_LEN = 58;
 
 // 0:28–0:30 · Wordmark builds, tagline, then the waitlist URL. Everything
 // folds back into the handset circle so the last frame equals the first.
-export const CloseShot: React.FC<{ url: string; len?: number; meson?: boolean }> = ({ url, len = CLOSE_LEN, meson = false }) => {
+export const CloseShot: React.FC<{ url: string; len?: number; meson?: boolean; chained?: boolean }> = ({ url, len = CLOSE_LEN, meson = false, chained = false }) => {
   const f = useT();
   const { width, height } = useVideoConfig();
   const v = height > width;
@@ -18,7 +18,7 @@ export const CloseShot: React.FC<{ url: string; len?: number; meson?: boolean }>
   const open =
     prog(f, 1, 13, Easing.out(Easing.cubic)) * (1 - prog(f, end - 11, 11, Easing.inOut(Easing.cubic)));
   const out = 1 - prog(f, end - 14, 6, Easing.linear);
-  const hit = interpolate(f, [0, 4, 12], [0.6, 1.06, 1], { extrapolateRight: "clamp", easing: Easing.out(Easing.quad) });
+  const hit = interpolate(f, [0, 4, 12], [chained ? 1 : 0.6, 1.06, 1], { extrapolateRight: "clamp", easing: Easing.out(Easing.quad) });
   const tag = enter(f, 6, 24);
   const by = enter(f, 10, 30);
   const cta = enter(f, meson ? 12 : 10, 30);

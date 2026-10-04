@@ -24,3 +24,18 @@ export const Shift: React.FC<{ by: number; children: React.ReactNode }> = ({ by,
   const parent = useContext(Ctx);
   return <Ctx.Provider value={{ scale: parent.scale, offset: parent.offset + by }}>{children}</Ctx.Provider>;
 };
+
+/** Global frame offset, so the stage aurora drifts on across shot cuts. */
+export const StageClock = createContext(0);
+
+/**
+ * Head start (shot frames) for a screen revealed by a transition: its content
+ * is already filling in as it opens, while the camera still starts exactly
+ * where the last shot ended.
+ */
+export const LeadCtx = createContext(0);
+
+export const Lead: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const lead = useContext(LeadCtx);
+  return lead ? <Shift by={-lead}>{children}</Shift> : <>{children}</>;
+};

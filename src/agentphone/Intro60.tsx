@@ -1,12 +1,14 @@
 import React from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile } from "remotion";
 import { Supers, SuperCue } from "./lib/Supers";
-import { Pace } from "./lib/time";
+import { PHONE_H, PHONE_W } from "./lib/stage";
+import { LeadCtx, Pace, StageClock } from "./lib/time";
+import { Cam, Iris, stagePoint } from "./lib/transition";
 import { AfterShot } from "./shots/After";
 import { CloseShot } from "./shots/Close";
 import { ColdOpenShot } from "./shots/ColdOpen";
 import { DashboardShot } from "./shots/Dashboard";
-import { DesktopShot } from "./shots/Desktop";
+import { CALLBACK_PT, DesktopShot } from "./shots/Desktop";
 import { DialerShot } from "./shots/Dialer";
 import { IncomingShot } from "./shots/Incoming";
 import { InsightsShot } from "./shots/Insights";
@@ -78,33 +80,110 @@ const MUTED: SuperCue[] = [
   { from: K.dashboard, to: K.close, text: "Nothing slips through.", style: "side" },
 ];
 
+// Cameras at the end of each outgoing shot (content px), so a transition can
+// start from the exact on-screen spot of the element it grows out of.
+const PH = (x: number, y: number, z: number): Cam => ({ x, y, z });
+const DIALER_END = PH(PHONE_W / 2, 520, 1.05);
+const INCOMING_END = PH(PHONE_W / 2, 470, 1.06);
+const LIVE_END = PH(PHONE_W / 2, PHONE_H / 2, 1.03);
+const AFTER_END = PH(PHONE_W / 2, 380, 1.07);
+const SCORE_END = PH(PHONE_W / 2, 520, 1.12);
+const MAPPING_END = PH(PHONE_W / 2, 560, 1.1);
+
+/** A point on a phone screen (390×844, inside the 12px bezel). */
+const onPhone = (cam: Cam, x: number, y: number) => (v: boolean) =>
+  stagePoint(v, "phone", [PHONE_W, PHONE_H], cam, [x + 12, y + 12]);
+/** A point on a desktop board; the camera differs by orientation. */
+const onDesk = (size: [number, number], h: Cam, vert: Cam, x: number, y: number) => (v: boolean) =>
+  stagePoint(v, "desk", size, v ? vert : h, [x, y]);
+
+const OVER = 15; // frames the outgoing shot keeps playing under the transition
+const LEAD = 9; // head start for the incoming screen, so it opens onto content
+
+type Seam = { origin: (v: boolean) => [number, number]; ring: string } | null;
+const MINT = "#7df0b6";
+const GREEN = "#10c46e";
+
 export const AgentPhoneIntro60: React.FC<Intro60Props> = ({ supers, url, voiceover, music }) => {
-  // [name, from, to, pace, element]. Pace re-times a shot built for the 30s
-  // cut (2 = half speed); new shots run at 1.
-  const shots: [string, number, number, number, React.ReactNode][] = [
-    ["Cold open", K.cold, K.logo, 1, <ColdOpenShot muted={supers === "muted"} />],
-    ["Logo reveal", K.logo, K.dialer, 1, <LogoShot />],
-    ["Dialer", K.dialer, K.incoming, 1, <DialerShot />],
-    ["Incoming + context", K.incoming, K.live, 1.5, <IncomingShot tap={84} inset={{ at: 26, value: 70, markAt: 46 }} />],
-    ["Live call", K.live, K.after, 1.6, <LiveShot inset={false} easeOut={88} />],
-    ["After the call", K.after, K.messages, 1.4, <AfterShot flyOut={false} />],
-    ["Messages", K.messages, K.desktop, 1, <MessagesShot />],
-    ["Desktop · Today", K.desktop, K.routing, (K.routing - K.desktop) / 174, <DesktopShot />],
-    ["Routing", K.routing, K.score, 0.9, <RoutingShot />],
-    ["Call score", K.score, K.insights, (K.insights - K.score) / 58, <ScoreShot />],
-    ["Insights", K.insights, K.mapping, 1, <InsightsShot />],
-    ["Connect a CRM", K.mapping, K.dashboard, 1, <MappingShot />],
-    ["Morning dashboard", K.dashboard, K.close, 1.25, <DashboardShot len={(K.close - K.dashboard) / 1.25} />],
+  // [name, from, to, pace, element, how this shot arrives]. Pace re-times a
+  // shot built for the 30s cut (2 = half speed). A null seam is a match cut
+  // carried by an object: the merging calls, the pill, the flying summary
+  // row, the phone folding into the handset circle.
+  const shots: [string, number, number, number, React.ReactNode, Seam][] = [
+    ["Cold open", K.cold, K.logo, 1, <ColdOpenShot muted={supers === "muted"} />, null],
+    ["Logo reveal", K.logo, K.dialer, 1, <LogoShot endPill />, null],
+    ["Dialer", K.dialer, K.incoming, 1, <DialerShot />, null],
+    [
+      "Incoming + context", K.incoming, K.live, 1.5,
+      <IncomingShot tap={90} inset={{ at: 26, value: 70, markAt: 46 }} camFrom={DIALER_END} />,
+      { origin: onPhone(DIALER_END, 196, 781), ring: MINT }, // out of the Call button
+    ],
+    [
+      "Live call", K.live, K.after, 1.6,
+      <LiveShot inset={false} easeOut={80} endAt={84} camFrom={INCOMING_END} />,
+      { origin: onPhone(INCOMING_END, 299, 748), ring: MINT }, // out of Accept
+    ],
+    [
+      "After the call", K.after, K.messages, 1.4,
+      <AfterShot flyOut={false} sendAt={126} camFrom={LIVE_END} />,
+      { origin: onPhone(LIVE_END, 196, 786), ring: "#fb5e7e" }, // out of End call
+    ],
+    [
+      "Messages", K.messages, K.desktop, 1,
+      <MessagesShot camFrom={AFTER_END} />,
+      { origin: onPhone(AFTER_END, 321, 528), ring: MINT }, // out of "Send the brochure"
+    ],
+    ["Desktop · Today", K.desktop, K.routing, (K.routing - K.desktop) / 174, <DesktopShot tokenAt={162} />, null],
+    [
+      "Routing", K.routing, K.score, 0.9, <RoutingShot />,
+      { origin: onDesk([1280, 800], PH(640, 400, 1), PH(640, 400, 1.15), ...CALLBACK_PT), ring: GREEN }, // out of the call token
+    ],
+    [
+      "Call score", K.score, K.insights, (K.insights - K.score) / 58, <ScoreShot />,
+      { origin: onDesk([1280, 940], PH(430, 575, 1.45), PH(340, 600, 2.15), 472, 709), ring: MINT }, // token on Send SMS
+    ],
+    [
+      "Insights", K.insights, K.mapping, 1, <InsightsShot />,
+      { origin: onPhone(SCORE_END, 83, 220), ring: GREEN }, // out of the 72 score tile
+    ],
+    [
+      "Connect a CRM", K.mapping, K.dashboard, 1, <MappingShot pressAt={104} />,
+      { origin: onDesk([1280, 1010], PH(640, 505, 0.99), PH(450, 520, 1.24), 1186, 955), ring: MINT }, // out of "Contact →"
+    ],
+    [
+      "Morning dashboard", K.dashboard, K.close, 1.25,
+      <DashboardShot len={(K.close - K.dashboard) / 1.25} camFrom={MAPPING_END} toCircle />,
+      { origin: onPhone(MAPPING_END, 197, 799), ring: MINT }, // out of "Continue"
+    ],
   ];
   return (
     <AbsoluteFill style={{ background: "#0c1410" }}>
-      {shots.map(([name, from, to, pace, el]) => (
-        <Sequence key={name} name={name} from={from} durationInFrames={to - from}>
-          <Pace scale={pace}>{el}</Pace>
-        </Sequence>
-      ))}
+      {shots.map(([name, from, to, pace, el, seam], i) => {
+        const next = shots[i + 1];
+        const tail = next && next[5] ? OVER : 0;
+        const body = (
+          <StageClock.Provider value={from}>
+            <Pace scale={pace}>
+              <LeadCtx.Provider value={seam ? LEAD : 0}>{el}</LeadCtx.Provider>
+            </Pace>
+          </StageClock.Provider>
+        );
+        return (
+          <Sequence key={name} name={name} from={from} durationInFrames={to - from + tail}>
+            {seam ? (
+              <Iris origin={seam.origin} dur={OVER} ring={seam.ring}>
+                {body}
+              </Iris>
+            ) : (
+              body
+            )}
+          </Sequence>
+        );
+      })}
       <Sequence name="Close" from={K.close} durationInFrames={K.end - K.close}>
-        <CloseShot url={url} len={K.end - K.close} meson />
+        <StageClock.Provider value={K.close}>
+          <CloseShot url={url} len={K.end - K.close} meson chained />
+        </StageClock.Provider>
       </Sequence>
       {supers === "none" ? null : <Supers cues={supers === "muted" ? MUTED : VO} />}
       {music ? <Audio src={staticFile(music)} /> : null}

@@ -1,10 +1,16 @@
 // Auto-converted from AgentPhone Motion Brief.html (data-shot="live"), 390x844.
 import React from "react";
-import {Mark, Timer} from "../lib/bits";
+import {Mark, Ripple, Timer} from "../lib/bits";
+import {interpolate} from "remotion";
+import {useT} from "../lib/time";
+import {pulse} from "../lib/anim";
 import {Amb} from "../lib/Amb";
 import {A} from "../lib/A";
 
-export const LiveScreen: React.FC = () => (
+export const LiveScreen: React.FC<{endAt?: number}> = ({endAt}) => {
+  const f = useT();
+  const press = endAt === undefined ? 1 : interpolate(f, [endAt - 3, endAt, endAt + 8], [1, 0.94, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  return (
   <div style={{position: "relative", width: 390, height: 844, overflow: "hidden"}}>
     <div style={{width: "390px", height: "844px", borderRadius: "46px", overflow: "hidden", position: "relative", fontFamily: "'Geist',sans-serif", color: "#16241d", background: "#e6f2ec", boxShadow: "0 30px 60px -24px rgba(16,74,52,.4)", display: "flex", flexDirection: "column"}}>
       <div style={{position: "absolute", inset: "0", background: "radial-gradient(72% 50% at 0% 0%,#a7f3d0 0%,transparent 56%),radial-gradient(66% 48% at 100% 4%,#bae6fd 0%,transparent 54%),radial-gradient(80% 55% at 60% 100%,#d1fae5 0%,transparent 55%),#e6f2ec"}} />
@@ -221,7 +227,8 @@ export const LiveScreen: React.FC = () => (
               </span>
             </div>
           </div>
-          <div style={{height: "64px", borderRadius: "32px", background: "linear-gradient(180deg,#fb5e7e,#e11d48)", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", color: "#fff", fontWeight: "700", fontSize: "16px", boxShadow: "0 14px 30px -10px rgba(225,29,72,.6),inset 0 1px 0 rgba(255,255,255,.35)"}}>
+          <div style={{position: "relative", scale: `${press * (endAt === undefined ? 1 : 1 + 0.04 * pulse(f, endAt - 14, 12))}`, height: "64px", borderRadius: "32px", background: "linear-gradient(180deg,#fb5e7e,#e11d48)", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", color: "#fff", fontWeight: "700", fontSize: "16px", boxShadow: "0 14px 30px -10px rgba(225,29,72,.6),inset 0 1px 0 rgba(255,255,255,.35)"}}>
+            {endAt === undefined ? null : <Ripple at={endAt} size={64} color="rgba(251,94,126,.7)" />}
             <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff" style={{transform: "rotate(135deg)"}}>
               <path d="M19.6 21c-2.3 0-4.6-.6-6.9-1.7-2.2-1.1-4.2-2.6-6-4.4-1.8-1.8-3.3-3.8-4.4-6C1.2 6.7.6 4.4.6 2.1c0-.4.1-.7.4-1C1.3.8 1.6.7 2 .7h3.3c.3 0 .6.1.8.3.2.2.4.5.4.8.1.8.3 1.6.6 2.4.2.5.1 1-.3 1.4L5.6 8.1c1.2 2.2 2.9 3.9 5.1 5.1l1.7-1.7c.4-.4.9-.5 1.4-.3.8.3 1.6.5 2.4.6.3 0 .6.2.8.4.2.2.3.5.3.8V19c0 .4-.1.7-.4 1-.3.3-.6.4-1 .4z" />
             </svg>
@@ -231,4 +238,5 @@ export const LiveScreen: React.FC = () => (
       </div>
     </div>
   </div>
-);
+  );
+};
