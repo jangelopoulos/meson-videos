@@ -118,9 +118,9 @@ export const AgentPhoneIntro60: React.FC<Intro60Props> = ({ supers, url, voiceov
           camV={[
             { f: 0, x: 640, y: 505, z: 1 },
             { f: 12, x: 640, y: 505, z: 1 },
-            { f: 50, x: 450, y: 230, z: 1.5 },
-            { f: 100, x: 450, y: 260, z: 1.5 },
-            { f: 145, x: 640, y: 505, z: 1 },
+            { f: 50, x: 400, y: 260, z: 2.1 },
+            { f: 100, x: 420, y: 420, z: 1.9 },
+            { f: 150, x: 640, y: 505, z: 1 },
           ]}
         />
       </LeadCtx.Provider>,
