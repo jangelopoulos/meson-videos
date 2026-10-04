@@ -109,7 +109,8 @@ const Blob: React.FC<{
   o: number;
   dur: number;
   reverse?: boolean;
-}> = ({ t, color, size, x, y, o, dur, reverse }) => {
+}> = ({ t, color, size: base, x, y, o, dur, reverse }) => {
+  const size = base * 1.4; // matches the spread the old 140px blur gave
   const a = ambStyle("ccFloat", t, dur, 0, reverse);
   // Scale the brief's 22px drift up to stage size.
   const [dx, dy] = String(a.translate).split(" ").map((v) => parseFloat(v) * 3);
@@ -124,8 +125,9 @@ const Blob: React.FC<{
         marginLeft: -size / 2,
         marginTop: -size / 2,
         borderRadius: "50%",
-        background: color,
-        filter: "blur(140px)",
+        // A soft radial falloff instead of filter: blur — same look, far
+        // cheaper to rasterise in headless Chrome.
+        background: `radial-gradient(closest-side, ${color} 0%, ${color}00 100%)`,
         opacity: o,
         translate: `${dx}px ${dy}px`,
       }}
