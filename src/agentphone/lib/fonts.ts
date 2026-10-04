@@ -1,31 +1,24 @@
-import { loadFont } from "@remotion/fonts";
-import { staticFile } from "remotion";
+import { continueRender, delayRender, staticFile } from "remotion";
 
-// Geist + Geist Mono (variable, OFL) extracted from the motion brief bundle.
-const LATIN =
-  "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD";
-const LATIN_EXT =
-  "U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF";
-
-const faces: [string, string, string][] = [
-  ["Geist", "Geist-latin.woff2", LATIN],
-  ["Geist", "Geist-latin-ext.woff2", LATIN_EXT],
-  ["Geist Mono", "GeistMono-latin.woff2", LATIN],
-  ["Geist Mono", "GeistMono-latin-ext.woff2", LATIN_EXT],
-  [
-    "Geist Mono",
-    "GeistMono-symbols2.woff2",
-    "U+2000-2001, U+2004-2008, U+200A, U+23B8-23BD, U+2500-259F",
-  ],
+// Geist + Geist Mono (variable, OFL), latin subset, extracted from the motion
+// brief bundle. Loaded with a short timeout and retries: a stalled font fetch
+// in one render tab reloads that tab instead of failing the whole render.
+const faces: [string, string][] = [
+  ["Geist", "Geist-latin.woff2"],
+  ["Geist Mono", "GeistMono-latin.woff2"],
 ];
 
+const handle = delayRender("Loading Geist fonts", {
+  timeoutInMilliseconds: 20000,
+  retries: 3,
+});
+
 export const fontsReady = Promise.all(
-  faces.map(([family, file, unicodeRange]) =>
-    loadFont({
-      family,
-      url: staticFile(`fonts/${file}`),
+  faces.map(async ([family, file]) => {
+    const face = new FontFace(family, `url('${staticFile(`fonts/${file}`)}') format('woff2')`, {
       weight: "100 900",
-      unicodeRange,
-    }),
-  ),
-);
+    });
+    await face.load();
+    document.fonts.add(face);
+  }),
+).then(() => continueRender(handle));
