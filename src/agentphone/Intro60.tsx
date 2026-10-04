@@ -18,19 +18,13 @@ import { EXPAND_LEN, ExpandShot, INSIGHTS_LEAD } from "./shots/Expand";
 import { InsightsShot } from "./shots/Insights";
 import { LogoShot } from "./shots/Logo";
 import { ViewBothShot } from "./shots/ViewBoth";
-import { beat } from "./theme";
+import { CrmLogos } from "./shots/CrmLogos";
 import { Soundtrack60 } from "./Soundtrack60";
-import { CUTS_60, DURATION_60 } from "./cuts60";
+import { CUTS_60, DURATION_60, S1, S2, STORY1_LEN, STORY2_LEN } from "./cuts60";
 
 export { CUTS_60, DURATION_60 };
 
 
-// Screens inside the first phone story (frames from K.call).
-const S1 = { incoming: 0, live: beat(23) - beat(14), after: beat(39) - beat(14), score: beat(56) - beat(14) };
-const STORY1_LEN = beat(65) - beat(14);
-// Second phone story (frames from K.mobile).
-const S2 = { messages: 8, mapping: beat(101) - beat(87) };
-const STORY2_LEN = beat(114) - beat(87);
 
 const C = (x: number, y: number, z: number): Cam => ({ x, y, z });
 const MID = PHONE_H / 2;
@@ -52,22 +46,22 @@ const at = (s: number) => K.call + s;
 const atM = (s: number) => K.mobile + s;
 
 const VO: SuperCue[] = [
-  { from: at(S1.incoming), to: at(S1.live), text: "Context before you answer", style: "side" },
+  { from: at(S1.incoming), to: at(S1.live), text: "Know who's calling", style: "side" },
   { from: at(S1.live), to: at(S1.after), text: "Live transcript", style: "side" },
   { from: at(S1.after), to: at(S1.score), text: "Notes that write themselves", style: "side" },
-  { from: at(S1.score), to: K.expand, text: "Coach from real calls", style: "side" },
-  { from: K.insights, to: K.both, text: "Coach from real calls", style: "chip" },
+  { from: at(S1.score), to: K.expand, text: "AI coaching on every call", style: "side" },
+  { from: K.insights, to: K.both, text: "Analytics, not a phone log", style: "chip" },
   { from: atM(S2.messages), to: atM(S2.mapping), text: "Calls and texts, one thread", style: "side" },
   { from: atM(S2.mapping), to: K.close - 10, text: "Set up in minutes", style: "side" },
 ];
 
 const MUTED: SuperCue[] = [
   { from: K.logo + 6, to: K.call, text: "Meet AgentPhone.", style: "below" },
-  { from: at(S1.incoming), to: at(S1.live), text: "Know who's calling before you answer.", style: "side" },
+  { from: at(S1.incoming), to: at(S1.live), text: "Know who's calling, with context from your CRM.", style: "side" },
   { from: at(S1.live), to: at(S1.after), text: "Every call transcribed live.", style: "side" },
   { from: at(S1.after), to: at(S1.score), text: "Hang up. Notes, tasks and CRM: done.", style: "side" },
-  { from: at(S1.score), to: K.expand, text: "Every call scored. Coach what matters.", style: "side" },
-  { from: K.insights, to: K.both, text: "Every call scored. Coach what matters.", style: "chip" },
+  { from: at(S1.score), to: K.expand, text: "AI coaching on every call.", style: "side" },
+  { from: K.insights, to: K.both, text: "Analytics on every call, not just a phone log.", style: "chip" },
   { from: atM(S2.messages), to: atM(S2.mapping), text: "Calls and texts in one thread.", style: "side" },
   { from: atM(S2.mapping), to: K.close - 10, text: "Plugs into your CRM in minutes.", style: "side" },
 ];
@@ -88,7 +82,7 @@ export const AgentPhoneIntro60: React.FC<Intro60Props> = ({ supers, url, voiceov
         len={STORY1_LEN}
         screens={[
           { name: "Incoming", from: S1.incoming, el: <IncomingScreen tap={112} ripple={false} /> },
-          { name: "Live", from: S1.live, lead: 2, el: <LiveScreen typing endAt={214} /> },
+          { name: "Live", from: S1.live, lead: 2, el: <LiveScreen typing endAt={190} /> },
           { name: "After the call", from: S1.after, lead: 4, el: <AfterScreen think /> },
           { name: "Call score", from: S1.score, lead: SCORE_LEAD, pace: SCORE_PACE, el: <ScoreScreen /> },
         ]}
@@ -131,7 +125,7 @@ export const AgentPhoneIntro60: React.FC<Intro60Props> = ({ supers, url, voiceov
         />
       </LeadCtx.Provider>,
     ],
-    ["Desktop or mobile", K.both, K.mobile, <ViewBothShot insightsAt={INSIGHTS_LEAD + EXPAND_LEN + insightsLen} />],
+    ["Desktop or mobile", K.both, K.mobile, <ViewBothShot len={K.mobile - K.both} insightsAt={INSIGHTS_LEAD + EXPAND_LEN + insightsLen} />],
     [
       // Back on the phone: messages, then set-up, then fold into the logo.
       "Messages + set up", K.mobile, K.close,
@@ -151,7 +145,9 @@ export const AgentPhoneIntro60: React.FC<Intro60Props> = ({ supers, url, voiceov
           { f: S2.mapping + 90, ...C(X, 560, 1.08) },
           { f: STORY2_LEN - 16, ...C(X, 560, 1.08) },
         ]}
-      />,
+      >
+        <CrmLogos at={S2.mapping + 22} outAt={STORY2_LEN - 20} />
+      </PhoneStory>,
     ],
   ];
   return (

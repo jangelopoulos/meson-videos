@@ -8,9 +8,7 @@ import { InsightsScreen } from "../screens/insights";
 import { C, FONT } from "../theme";
 import { deskRect } from "./Expand";
 
-export const VIEW_LEN = 131;
 const SPLIT = 22; // board shrinks aside, phone joins it
-const BACK = 92; // then back to the phone
 
 type R = { x: number; y: number; w: number; h: number };
 const mix = (a: R, b: R, t: number): R => ({
@@ -22,7 +20,9 @@ const mix = (a: R, b: R, t: number): R => ({
 
 // "Every call, on desktop or mobile." The calls board shrinks aside, the
 // phone joins it, then the phone takes the stage again.
-export const ViewBothShot: React.FC<{ insightsAt: number }> = ({ insightsAt }) => {
+export const ViewBothShot: React.FC<{ insightsAt: number; len: number }> = ({ insightsAt, len }) => {
+  const VIEW_LEN = len;
+  const BACK = len - 39; // then back to the phone
   const f = useT();
   const v = useVertical();
   const ease = Easing.inOut(Easing.cubic);

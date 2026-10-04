@@ -50,7 +50,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition id="AgentPhone-60-Vertical" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1080} height={1920} defaultProps={props60} />
       </Folder>
       <Folder name="AgentPhone-Shots">
-        <Composition id="Shot-ColdOpen" component={ColdOpenShot} durationInFrames={116} fps={30} width={1920} height={1080} />
+        <Composition id="Shot-ColdOpen" component={ColdOpenShot} durationInFrames={189} fps={30} width={1920} height={1080} />
         <Composition id="Shot-Dialer" component={DialerShot} durationInFrames={131} fps={30} width={1920} height={1080} />
         <Composition id="Shot-Messages" component={MessagesShot} durationInFrames={116} fps={30} width={1920} height={1080} />
         <Composition id="Shot-Mapping" component={MappingShot} durationInFrames={116} fps={30} width={1920} height={1080} />

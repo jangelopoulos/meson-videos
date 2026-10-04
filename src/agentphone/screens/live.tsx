@@ -8,9 +8,9 @@ import {Amb} from "../lib/Amb";
 import {A} from "../lib/A";
 
 // Live mode: each line is written out as it's spoken.
-const CPS = 34;
+const CPS = 40;
 const lineDur = (chars: number) => Math.ceil((chars / CPS) * 30);
-export const TYPING = {l1: 12, l1Len: 75, l2: 86, l3: 157, l3Len: 49, listen: 205, actions: 202};
+export const TYPING = {l1: 12, l1Len: 75, l2: 76, l3: 138, l3Len: 49, listen: 180, actions: 178};
 
 const BUBBLE_THEM: React.CSSProperties = {fontSize: "14px", lineHeight: "1.5", color: "#1f3a2e", borderRadius: "16px", borderTopLeftRadius: "5px", padding: "10px 13px", display: "inline-block", maxWidth: "90%", background: "linear-gradient(150deg,rgba(255,255,255,.72),rgba(255,255,255,.48))", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,.7)"};
 const BUBBLE_YOU: React.CSSProperties = {fontSize: "14px", lineHeight: "1.5", color: "#fff", borderRadius: "16px", borderTopRightRadius: "5px", padding: "10px 13px", display: "inline-block", maxWidth: "90%", textAlign: "left", background: "linear-gradient(160deg,#10c46e,#0a8f4e)", boxShadow: "0 6px 16px -8px rgba(12,154,85,.6)"};

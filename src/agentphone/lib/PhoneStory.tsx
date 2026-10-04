@@ -29,7 +29,9 @@ export const PhoneStory: React.FC<{
   cam: Key[];
   rise?: boolean;
   foldAt?: number;
-}> = ({ screens, len, cam, rise = false, foldAt }) => {
+  /** Stage overlays (e.g. the CRM logo grid) on the story clock. */
+  children?: React.ReactNode;
+}> = ({ screens, len, cam, rise = false, foldAt, children }) => {
   const f = useT();
   const v = useVertical();
   const r = rise ? prog(f, 0, 16, Easing.out(Easing.cubic)) : 1;
@@ -55,6 +57,7 @@ export const PhoneStory: React.FC<{
           </Phone>
         </div>
       </Framed>
+      {children}
       {foldAt !== undefined && fold > 0 ? <Fold m={fold} cam={cam[cam.length - 1]} /> : null}
     </DarkStage>
   );

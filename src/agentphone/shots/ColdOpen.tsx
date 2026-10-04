@@ -5,11 +5,11 @@ import { HANDSET } from "../lib/Wordmark";
 import { useT } from "../lib/time";
 import { C, FONT, MONO } from "../theme";
 
-export const COLD_LEN = 116;
+export const COLD_LEN = 189;
 const SPREAD = 4; // the handset circle multiplies into 40 calls
-const RED = 62; // most of them flash red: missed or never logged
-const NOTES = 87; // "0 notes" lands on the downbeat (beat 6)
-const MERGE = 100; // survivors fly back into one circle for the logo
+const RED = 72; // most of them flash red: missed or never logged
+const NOTES = 87; // "0 logged" lands on the downbeat (beat 6), then holds ~2.5s
+const MERGE = 165; // survivors fly back into one circle for the logo
 
 // Deterministic pseudo-random so every render is identical.
 const rand = (i: number) => {
@@ -55,7 +55,9 @@ export const ColdOpenShot: React.FC<{ muted?: boolean }> = ({ muted = false }) =
   const seed = 1 - prog(f, SPREAD, 8, Easing.in(Easing.quad)); // the opening circle
   const textOut = 1 - prog(f, MERGE - 6, 8, Easing.linear);
   const line1 = enter(f, SPREAD + 6, 24);
-  const line2 = pop(f, NOTES, 0.85);
+  const line2 = pop(f, NOTES, 0.7);
+  const up = prog(f, NOTES - 10, 14, Easing.inOut(Easing.cubic));
+  const glow = 0.5 + 0.5 * Math.sin((f - NOTES) / 6);
   const merged = prog(f, COLD_LEN - 5, 4, Easing.linear);
   return (
     <AbsoluteFill style={{ background: C.callLayer }}>
@@ -112,17 +114,54 @@ export const ColdOpenShot: React.FC<{ muted?: boolean }> = ({ muted = false }) =
           <path d={HANDSET} fill={C.callLayer} transform="translate(9.5 9.5) scale(.95)" />
         </svg>
       </div>
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", flexDirection: "column", gap: v ? 26 : 18, opacity: textOut }}>
-        <div style={{ ...line1, display: "flex", alignItems: "baseline", gap: 24, flexDirection: v ? "column" : "row", ...(v ? { alignItems: "center", gap: 0 } : {}) }}>
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", opacity: textOut }}>
+        <div
+          style={{
+            ...line1,
+            position: "absolute",
+            display: "flex",
+            alignItems: "baseline",
+            gap: 24,
+            translate: `0px ${(line1.translate ? parseFloat(String(line1.translate).split(" ")[1]) : 0) - up * (v ? 330 : 230)}px`,
+            scale: `${1 - 0.42 * up}`,
+            opacity: line1.opacity * (1 - 0.45 * up),
+            ...(v ? { flexDirection: "column", alignItems: "center", gap: 0 } : {}),
+          }}
+        >
           <span style={{ fontFamily: MONO, fontWeight: 600, fontSize: v ? 220 : 200, color: C.onDark, lineHeight: 1, letterSpacing: "-0.04em" }}>
             {String(count).padStart(2, " ")}
           </span>
           <span style={{ fontFamily: FONT, fontWeight: 600, fontSize: v ? 84 : 88, color: C.onDark, letterSpacing: "-0.035em" }}>calls a day.</span>
         </div>
-        <div style={{ ...line2, display: "flex", alignItems: "baseline", gap: 20, fontFamily: FONT, fontWeight: 600, fontSize: v ? 76 : 80, letterSpacing: "-0.035em", color: C.onDark, textAlign: "center", flexWrap: "wrap", justifyContent: "center", maxWidth: v ? 900 : 1500 }}>
-          <span style={{ color: "rgba(232,245,238,.5)" }}>→</span>
-          <span style={{ fontFamily: MONO, color: "#fb5e7e" }}>0</span>
-          <span>{muted ? "notes in the CRM." : "notes."}</span>
+        <div
+          style={{
+            ...line2,
+            position: "absolute",
+            top: v ? 860 : 430,
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "center",
+            gap: v ? 24 : 34,
+            flexWrap: "wrap",
+            maxWidth: v ? 960 : 1700,
+            fontFamily: FONT,
+            fontWeight: 600,
+            letterSpacing: "-0.04em",
+            color: C.onDark,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: MONO,
+              fontSize: v ? 330 : 300,
+              lineHeight: 0.9,
+              color: "#fb5e7e",
+              textShadow: `0 0 ${50 + 30 * glow}px rgba(225,29,72,.55)`,
+            }}
+          >
+            0
+          </span>
+          <span style={{ fontSize: v ? 120 : 130, lineHeight: 1 }}>{muted ? "logged in the CRM." : "logged."}</span>
         </div>
       </AbsoluteFill>
     </AbsoluteFill>
