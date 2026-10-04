@@ -1,5 +1,6 @@
+import {useT} from "../lib/time";
 import React from "react";
-import { Easing, interpolate, useCurrentFrame } from "remotion";
+import {Easing, interpolate} from "remotion";
 import { prog } from "../lib/anim";
 import { LoggedRow } from "../lib/LoggedRow";
 import { DarkStage, Framed, Phone, PHONE_H, PHONE_W, phoneBox, useVertical } from "../lib/stage";
@@ -10,8 +11,8 @@ export const FLY = 104; // the summary row lifts, then flies out to the right
 
 // 0:07–0:11 · After the call. Music drop. Hold "logged" 1.5s, then the row
 // flies out toward the desktop.
-export const AfterShot: React.FC = () => {
-  const f = useCurrentFrame();
+export const AfterShot: React.FC<{ flyOut?: boolean }> = ({ flyOut = true }) => {
+  const f = useT();
   const v = useVertical();
   const lift = prog(f, FLY, 8);
   const fly = interpolate(f, [FLY + 6, AFTER_LEN], [0, 1], {
@@ -35,7 +36,7 @@ export const AfterShot: React.FC = () => {
           <AfterScreen />
           <CollapsingWave />
         </Phone>
-        {f >= FLY ? (
+        {flyOut && f >= FLY ? (
           <LoggedRow
             style={{
               position: "absolute",
@@ -55,7 +56,7 @@ export const AfterShot: React.FC = () => {
 
 /** The live waveform collapses into a flat line as the call ends. */
 const CollapsingWave: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useT();
   const amp = interpolate(f, [0, 9], [1, 0], {
     extrapolateRight: "clamp",
     easing: Easing.in(Easing.quad),

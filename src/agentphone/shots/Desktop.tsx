@@ -1,5 +1,5 @@
+import {useT} from "../lib/time";
 import React from "react";
-import { useCurrentFrame } from "remotion";
 import { enter } from "../lib/anim";
 import { deskBox, Framed, Key, PaperStage, useVertical } from "../lib/stage";
 import { CALLBACK, DesktopScreen, QUERY } from "../screens/desktop";
@@ -33,7 +33,7 @@ const V: Key[] = [
 // 0:11–0:17 · Desktop · Today. The after-call row lands, then the camera
 // tours calendar → unanswered → list builder and pulls out.
 export const DesktopShot: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useT();
   const v = useVertical();
   return (
     <PaperStage>

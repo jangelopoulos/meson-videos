@@ -1,6 +1,7 @@
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import { EASE_CAM } from "./anim";
+import { useT } from "./time";
 import { ambStyle } from "./Amb";
 import { C } from "../theme";
 
@@ -45,7 +46,7 @@ export const Framed: React.FC<{
   style?: React.CSSProperties;
   damp?: boolean;
 }> = ({ w, h, box, cam, children, style, damp }) => {
-  const f = useCurrentFrame();
+  const f = useT();
   const fit = Math.min(box.w / w, box.h / h);
   const raw = cam ? camAt(cam, f) : { x: w / 2, y: h / 2, z: 1 };
   // Portrait phone shots leave the top of frame for the super, so their

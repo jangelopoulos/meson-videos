@@ -1,7 +1,8 @@
 // Auto-converted from AgentPhone Motion Brief.html (data-shot="routing"), 1280x940.
+import {useT} from "../lib/time";
 import React from "react";
 import {A} from "../lib/A";
-import {Easing, interpolate, useCurrentFrame} from "remotion";
+import {Easing, interpolate} from "remotion";
 import {draw, prog} from "../lib/anim";
 import {Count} from "../lib/bits";
 import {Amb} from "../lib/Amb";
@@ -39,7 +40,7 @@ const lit = (f: number, left: number, top: number): React.CSSProperties => {
 };
 
 const CallToken: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useT();
   if (f < TOKEN - 4) return null;
   const [x, y] = tokenAt(f);
   const ring = f > TOKEN + 24 && f < TOKEN + 36;
@@ -62,7 +63,7 @@ const CallToken: React.FC = () => {
 };
 
 export const RoutingScreen: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useT();
   return (
   <div style={{position: "relative", width: 1280, height: 940, overflow: "hidden"}}>
     <div data-screen-label="46a" style={{width: "1280px", height: "940px", borderRadius: "24px", overflow: "hidden", position: "relative", background: "#eef4f0", color: "#16241d"}}>

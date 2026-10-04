@@ -1,7 +1,8 @@
 // Auto-converted from AgentPhone Motion Brief.html (data-shot="desktop"), 1280x800.
+import {useT} from "../lib/time";
 import React from "react";
 import {A} from "../lib/A";
-import {Easing, useCurrentFrame} from "remotion";
+import {Easing} from "remotion";
 import {prog, pulse} from "../lib/anim";
 import {Count, Typed} from "../lib/bits";
 import {LoggedRow} from "../lib/LoggedRow";
@@ -12,7 +13,7 @@ export const QUERY = 116;
 
 /** Slot at the top of the list that opens as the flying row lands. */
 const LandingSlot: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useT();
   const open = prog(f, LAND - 14, 14);
   const fly = prog(f, 0, LAND, Easing.out(Easing.cubic));
   const glow = pulse(f, LAND, 18);
@@ -34,7 +35,7 @@ const LandingSlot: React.FC = () => {
 };
 
 export const DesktopScreen: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useT();
   return (
   <div style={{position: "relative", width: 1280, height: 800, overflow: "hidden"}}>
     <div style={{width: "1280px", height: "800px", borderRadius: "24px", overflow: "visible", position: "relative", color: "#16241d", background: "#eef4f0"}}>

@@ -1,12 +1,12 @@
 // Auto-converted from AgentPhone Motion Brief.html (data-shot="context"), 460x340.
+import {useT} from "../lib/time";
 import React from "react";
 import {A} from "../lib/A";
-import {useCurrentFrame} from "remotion";
 import {draw} from "../lib/anim";
-import {Count} from "../lib/bits";
+import {Count, Mark} from "../lib/bits";
 
-export const ContextScreen: React.FC = () => {
-  const f = useCurrentFrame();
+export const ContextScreen: React.FC<{value?: number; markAt?: number}> = ({value = 82, markAt}) => {
+  const f = useT();
   return (
   <div style={{position: "relative", width: 460, height: 340, overflow: "hidden"}}>
     <div style={{width: "460px", height: "340px", borderRadius: "24px", overflow: "visible", position: "relative"}}>
@@ -15,7 +15,7 @@ export const ContextScreen: React.FC = () => {
           <div style={{position: "relative", width: "74px", height: "74px"}}>
             <svg width="74" height="74" viewBox="0 0 74 74" style={{position: "absolute", inset: "0", transform: "rotate(-90deg)"}}>
               <circle cx="37" cy="37" r="33" fill="none" stroke="rgba(22,36,29,.08)" strokeWidth="5" />
-              <circle cx="37" cy="37" r="33" fill="none" stroke="#10c46e" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${170 * draw(f, 4)} 207`} />
+              <circle cx="37" cy="37" r="33" fill="none" stroke="#10c46e" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${207 * (value / 100) * draw(f, 4)} 207`} />
             </svg>
             <div style={{position: "absolute", inset: "9px", borderRadius: "50%", background: "rgba(16,196,110,.16)", color: "#0c6b43", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "17px"}}>
               JH
@@ -23,7 +23,7 @@ export const ContextScreen: React.FC = () => {
           </div>
           <div style={{textAlign: "center"}}>
             <div style={{fontFamily: "'Geist Mono',monospace", fontSize: "13px", fontWeight: "600", color: "#0c6b43"}}>
-              <Count to={82} at={4} />°
+              <Count to={value} at={4} />°
             </div>
             <div style={{fontSize: "9px", color: "#8a9690", fontWeight: "600", letterSpacing: ".06em"}}>
               ENGAGEMENT
@@ -62,7 +62,7 @@ export const ContextScreen: React.FC = () => {
               <span style={{width: "6px", height: "6px", borderRadius: "50%", background: "#f59e0b", flex: "none"}} />
               {"Prefers "}
               <b>
-                calls after 4pm
+                {markAt === undefined ? "calls after 4pm" : <Mark at={markAt} color="rgba(245,158,11,.35)">calls after 4pm</Mark>}
               </b>
               {" weekdays"}
             </A>

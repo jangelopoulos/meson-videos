@@ -1,5 +1,6 @@
+import {useT} from "../lib/time";
 import React from "react";
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
+import {AbsoluteFill, Easing, interpolate, useVideoConfig} from "remotion";
 import { EASE_POP, prog } from "../lib/anim";
 import { Wordmark } from "../lib/Wordmark";
 import { C } from "../theme";
@@ -20,7 +21,7 @@ const ringHalo = (f: number, at: number) => {
 // 0:00–0:03 · The handset circle stretches into the pill, rings twice
 // (amber halo), then opens into the wordmark.
 export const LogoShot: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useT();
   const { width, height } = useVideoConfig();
   const v = height > width;
   const fs = v ? 150 : 200;

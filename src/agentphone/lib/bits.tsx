@@ -1,5 +1,6 @@
+import {useT} from "./time";
 import React from "react";
-import { interpolate, useCurrentFrame } from "remotion";
+import {interpolate, useCurrentFrame} from "remotion";
 import { count, draw, typed } from "./anim";
 import { MONO } from "../theme";
 
@@ -13,7 +14,7 @@ export const Count: React.FC<{
   suffix?: string;
   pad?: number;
 }> = ({ to, at, dur, decimals = 0, prefix = "", suffix = "", pad = 0 }) => {
-  const f = useCurrentFrame();
+  const f = useT();
   const v = count(f, at, to, dur);
   const s = v.toFixed(decimals).padStart(pad, "0");
   return (
@@ -31,7 +32,7 @@ export const Mark: React.FC<{
   color?: string;
   children: React.ReactNode;
 }> = ({ at, color = "rgba(125,240,182,.55)", children }) => {
-  const f = useCurrentFrame();
+  const f = useT();
   const p = draw(f, at, 12);
   return (
     <span
@@ -59,7 +60,7 @@ export const Typed: React.FC<{
   caret?: boolean;
   caretColor?: string;
 }> = ({ text, at, cps = 14, caret, caretColor = "#0c9a55" }) => {
-  const f = useCurrentFrame();
+  const f = useT();
   const shown = typed(text, f, at, cps);
   const blink = Math.floor(f / 8) % 2 === 0;
   return (
@@ -89,7 +90,7 @@ export const CheckDraw: React.FC<{
   color?: string;
   width?: number;
 }> = ({ at, size = 14, color = "#0c6b43", width = 3 }) => {
-  const f = useCurrentFrame();
+  const f = useT();
   const p = draw(f, at, 10);
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">

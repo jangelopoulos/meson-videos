@@ -1,12 +1,13 @@
+import {useT} from "../lib/time";
 import React from "react";
-import { useCurrentFrame } from "remotion";
 import { pop } from "../lib/anim";
 import { DarkStage, Framed, Phone, PHONE_H, PHONE_W, phoneBox, useVertical } from "../lib/stage";
 import { IncomingScreen } from "../screens/incoming";
+import { ContextInset } from "./ContextInset";
 
 // 0:03–0:05 · Incoming call. Camera pushes 6% toward the context card.
-export const IncomingShot: React.FC = () => {
-  const f = useCurrentFrame();
+export const IncomingShot: React.FC<{ tap?: number; inset?: { at: number; value: number; markAt: number } }> = ({ tap, inset }) => {
+  const f = useT();
   const v = useVertical();
   return (
     <DarkStage>
@@ -23,10 +24,11 @@ export const IncomingShot: React.FC = () => {
       >
         <div style={pop(f, 0, 0.9)}>
           <Phone>
-            <IncomingScreen />
+            <IncomingScreen tap={tap} />
           </Phone>
         </div>
       </Framed>
+      {inset ? <ContextInset {...inset} /> : null}
     </DarkStage>
   );
 };

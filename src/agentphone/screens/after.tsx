@@ -1,6 +1,6 @@
 // Auto-converted from AgentPhone Motion Brief.html (data-shot="after"), 390x844.
+import {useT} from "../lib/time";
 import React from "react";
-import {useCurrentFrame} from "remotion";
 import {fade} from "../lib/anim";
 import {CheckDraw} from "../lib/bits";
 import {Amb} from "../lib/Amb";
@@ -10,7 +10,7 @@ export const S1 = 18;
 export const LOGGED = 62;
 
 export const AfterScreen: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useT();
   return (
   <div style={{position: "relative", width: 390, height: 844, overflow: "hidden"}}>
     <div style={{width: "390px", height: "844px", borderRadius: "46px", overflow: "hidden", position: "relative", fontFamily: "'Geist',sans-serif", color: "#16241d", background: "#eef4f0", boxShadow: "0 30px 60px -24px rgba(16,74,52,.4)", display: "flex", flexDirection: "column"}}>

@@ -1,12 +1,12 @@
 // Auto-converted from AgentPhone Motion Brief.html (data-shot="insights"), 1280x1010.
+import {useT} from "../lib/time";
 import React from "react";
 import {A} from "../lib/A";
-import {useCurrentFrame} from "remotion";
 import {draw, prog} from "../lib/anim";
 import {Count} from "../lib/bits";
 
 export const InsightsScreen: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useT();
   return (
   <div style={{position: "relative", width: 1280, height: 1010, overflow: "hidden"}}>
     <div style={{width: "1280px", height: "1010px", borderRadius: "24px", overflow: "hidden", position: "relative", color: "#16241d", background: "#eef4f0"}}>

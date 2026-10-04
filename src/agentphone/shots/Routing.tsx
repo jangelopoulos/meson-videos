@@ -1,5 +1,5 @@
+import {useT} from "../lib/time";
 import React from "react";
-import { useCurrentFrame } from "remotion";
 import { enter } from "../lib/anim";
 import { deskBox, Framed, Key, PaperStage, useVertical } from "../lib/stage";
 import { LANDED, RoutingScreen, TOKEN } from "../screens/routing";
@@ -25,7 +25,7 @@ const V: Key[] = [
 // 0:17–0:21 · Routing. Music lift. Nodes pop, connectors draw, the call
 // token runs inbound → listing agent → no answer → Send SMS.
 export const RoutingShot: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useT();
   const v = useVertical();
   return (
     <PaperStage>

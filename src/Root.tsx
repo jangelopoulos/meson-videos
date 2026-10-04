@@ -1,6 +1,11 @@
 import "./index.css";
 import { Composition, Folder } from "remotion";
 import { AgentPhoneIntro, IntroProps } from "./agentphone/Intro";
+import { AgentPhoneIntro60, DURATION_60, Intro60Props } from "./agentphone/Intro60";
+import { ColdOpenShot } from "./agentphone/shots/ColdOpen";
+import { DialerShot } from "./agentphone/shots/Dialer";
+import { MappingShot } from "./agentphone/shots/Mapping";
+import { MessagesShot } from "./agentphone/shots/Messages";
 import { fontsReady } from "./agentphone/lib/fonts";
 import { AfterShot } from "./agentphone/shots/After";
 import { CloseShot } from "./agentphone/shots/Close";
@@ -22,6 +27,13 @@ const props: IntroProps = {
   music: null,
 };
 
+const props60: Intro60Props = {
+  supers: "vo",
+  url: "agentphone.com.au",
+  voiceover: null,
+  music: null,
+};
+
 export const RemotionRoot: React.FC = () => {
   return (
     <>
@@ -31,7 +43,17 @@ export const RemotionRoot: React.FC = () => {
         <Composition id="AgentPhone-Intro-Vertical" component={AgentPhoneIntro} durationInFrames={900} fps={30} width={1080} height={1920} defaultProps={props} />
         <Composition id="AgentPhone-Intro-Vertical-Muted" component={AgentPhoneIntro} durationInFrames={900} fps={30} width={1080} height={1920} defaultProps={{ ...props, muted: true }} />
       </Folder>
+      <Folder name="AgentPhone-60">
+        <Composition id="AgentPhone-60" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1920} height={1080} defaultProps={props60} />
+        <Composition id="AgentPhone-60-NoSupers" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1920} height={1080} defaultProps={{ ...props60, supers: "none" as const }} />
+        <Composition id="AgentPhone-60-Muted" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1920} height={1080} defaultProps={{ ...props60, supers: "muted" as const }} />
+        <Composition id="AgentPhone-60-Vertical" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1080} height={1920} defaultProps={props60} />
+      </Folder>
       <Folder name="AgentPhone-Shots">
+        <Composition id="Shot-ColdOpen" component={ColdOpenShot} durationInFrames={116} fps={30} width={1920} height={1080} />
+        <Composition id="Shot-Dialer" component={DialerShot} durationInFrames={131} fps={30} width={1920} height={1080} />
+        <Composition id="Shot-Messages" component={MessagesShot} durationInFrames={116} fps={30} width={1920} height={1080} />
+        <Composition id="Shot-Mapping" component={MappingShot} durationInFrames={116} fps={30} width={1920} height={1080} />
         <Composition id="Shot-Logo" component={LogoShot} durationInFrames={87} fps={30} width={1920} height={1080} />
         <Composition id="Shot-Incoming" component={IncomingShot} durationInFrames={58} fps={30} width={1920} height={1080} />
         <Composition id="Shot-Live" component={LiveShot} durationInFrames={58} fps={30} width={1920} height={1080} />

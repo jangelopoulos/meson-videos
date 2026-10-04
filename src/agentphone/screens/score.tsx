@@ -1,12 +1,12 @@
 // Auto-converted from AgentPhone Motion Brief.html (data-shot="score"), 390x844.
+import {useT} from "../lib/time";
 import React from "react";
 import {A} from "../lib/A";
-import {useCurrentFrame} from "remotion";
 import {draw, pulse} from "../lib/anim";
 import {Count} from "../lib/bits";
 
 export const ScoreScreen: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useT();
   return (
   <div style={{position: "relative", width: 390, height: 844, overflow: "hidden"}}>
     <div data-screen-label="TRAINING \u00b7 2 SCORE" style={{width: "390px", height: "844px", borderRadius: "46px", overflow: "hidden", position: "relative", fontFamily: "'Geist',sans-serif", color: "#16241d", background: "#eef4f0", boxShadow: "0 30px 60px -24px rgba(16,74,52,.4)"}}>

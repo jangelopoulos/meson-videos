@@ -1,5 +1,5 @@
+import {useT} from "./time";
 import React from "react";
-import { useCurrentFrame } from "remotion";
 import { enter, fade, pop, slide } from "./anim";
 
 export type Fx = "enter" | "pop" | "fade" | "slideL" | "slideR" | "rise";
@@ -31,7 +31,7 @@ export const A: React.FC<{
   children?: React.ReactNode;
   [k: string]: unknown;
 }> = ({ as = "div", fx = "enter", at, style, extra, children, ...rest }) => {
-  const f = useCurrentFrame();
+  const f = useT();
   const s = fxStyle(fx, f, at);
   const merged: React.CSSProperties = { ...style, ...s, ...extra };
   if (style?.opacity !== undefined) {

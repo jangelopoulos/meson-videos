@@ -1,6 +1,6 @@
 // Auto-converted from AgentPhone Motion Brief.html (data-shot="dashboard"), 390x844.
+import {useT} from "../lib/time";
 import React from "react";
-import {useCurrentFrame} from "remotion";
 import {EASE_POP, prog, pulse} from "../lib/anim";
 import {Count} from "../lib/bits";
 import {A} from "../lib/A";
@@ -9,7 +9,7 @@ import {Amb} from "../lib/Amb";
 export const START = 40; // Start follow-ups pulses once
 
 export const DashboardScreen: React.FC = () => {
-  const f = useCurrentFrame();
+  const f = useT();
   return (
   <div style={{position: "relative", width: 390, height: 844, overflow: "hidden"}}>
     <div style={{width: "390px", height: "844px", borderRadius: "46px", overflow: "hidden", position: "relative", fontFamily: "'Geist',sans-serif", color: "#16241d", background: "#eef4f0", boxShadow: "0 30px 60px -24px rgba(16,74,52,.4)"}}>
