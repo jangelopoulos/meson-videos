@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Audio, Sequence, staticFile } from "remotion";
+import { AbsoluteFill, Sequence } from "remotion";
 import { PhoneStory } from "./lib/PhoneStory";
 import { PHONE_H, PHONE_W } from "./lib/stage";
 import { Supers, SuperCue } from "./lib/Supers";
@@ -19,21 +19,11 @@ import { InsightsShot } from "./shots/Insights";
 import { LogoShot } from "./shots/Logo";
 import { ViewBothShot } from "./shots/ViewBoth";
 import { beat } from "./theme";
+import { Soundtrack60 } from "./Soundtrack60";
+import { CUTS_60, DURATION_60 } from "./cuts60";
 
-export const DURATION_60 = beat(124); // 1800 frames = 60.0s
+export { CUTS_60, DURATION_60 };
 
-// Every cut on the 124 BPM grid.
-export const CUTS_60 = {
-  cold: beat(0), // 0:00 · tense, sparse intro
-  logo: beat(8), // 0:04
-  call: beat(14), // 0:07 · phone rings → answer → live → summary → coach
-  expand: beat(65), // 0:31 · the phone grows into the desktop calls view
-  insights: beat(67),
-  both: beat(78), // 0:38 · on desktop or mobile
-  mobile: beat(87), // 0:42 · back to the phone: messages → set up
-  close: beat(114), // 0:55 · final hit
-  end: beat(124), // 1:00
-} as const;
 
 // Screens inside the first phone story (frames from K.call).
 const S1 = { incoming: 0, live: beat(23) - beat(14), after: beat(39) - beat(14), score: beat(56) - beat(14) };
@@ -51,8 +41,10 @@ export type Intro60Props = {
   /** "vo": short supers under voiceover; "muted": longer supers; "none": clean, for re-voicing. */
   supers: "vo" | "muted" | "none";
   url: string;
-  voiceover: string | null;
-  music: string | null;
+  /** ElevenLabs voiceover lines (not used in the muted version). */
+  voiceover: boolean;
+  /** Music bed and sound effects. */
+  music: boolean;
 };
 
 const K = CUTS_60;
@@ -175,8 +167,7 @@ export const AgentPhoneIntro60: React.FC<Intro60Props> = ({ supers, url, voiceov
         </StageClock.Provider>
       </Sequence>
       {supers === "none" ? null : <Supers cues={supers === "muted" ? MUTED : VO} />}
-      {music ? <Audio src={staticFile(music)} /> : null}
-      {voiceover && supers !== "muted" ? <Audio src={staticFile(voiceover)} /> : null}
+      <Soundtrack60 voiceover={voiceover && supers !== "muted"} music={music} />
     </AbsoluteFill>
   );
 };

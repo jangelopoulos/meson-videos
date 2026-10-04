@@ -30,8 +30,8 @@ const props: IntroProps = {
 const props60: Intro60Props = {
   supers: "vo",
   url: "agentphone.com.au",
-  voiceover: null,
-  music: null,
+  voiceover: true,
+  music: true,
 };
 
 export const RemotionRoot: React.FC = () => {
@@ -45,7 +45,7 @@ export const RemotionRoot: React.FC = () => {
       </Folder>
       <Folder name="AgentPhone-60">
         <Composition id="AgentPhone-60" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1920} height={1080} defaultProps={props60} />
-        <Composition id="AgentPhone-60-NoSupers" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1920} height={1080} defaultProps={{ ...props60, supers: "none" as const }} />
+        <Composition id="AgentPhone-60-NoSupers" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1920} height={1080} defaultProps={{ ...props60, supers: "none" as const, voiceover: false }} />
         <Composition id="AgentPhone-60-Muted" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1920} height={1080} defaultProps={{ ...props60, supers: "muted" as const }} />
         <Composition id="AgentPhone-60-Vertical" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1080} height={1920} defaultProps={props60} />
       </Folder>
