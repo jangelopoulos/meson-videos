@@ -2,25 +2,65 @@
 import React from "react";
 import {interpolate} from "remotion";
 import {useT} from "../lib/time";
-import {prog, pulse, slide} from "../lib/anim";
+import {enter, prog, pulse} from "../lib/anim";
 import {CheckDraw, Ripple, Typed} from "../lib/bits";
 import {A} from "../lib/A";
 import {Amb} from "../lib/Amb";
 
-export const DRAFT = 22; // AI draft starts typing
-export const SENT = 80;
+export const KB_OPEN = 22; // keyboard slides up
+export const DRAFT = 30; // AI-drafted reply types into the compose field
 const DRAFT_TEXT = "Booked you in 10–10:30am 🗓️ See you both there.";
+const CPS = 24;
+export const DRAFT_DONE = DRAFT + Math.ceil(([...DRAFT_TEXT].length / CPS) * 30);
+export const SENT = DRAFT_DONE + 5; // tap Send: keyboard closes, message lands in the thread
 
-/** Dashed while the AI composes it; turns solid and green when sent. */
-const DraftBubble: React.FC = () => {
+/** The sent reply, landing in the thread. */
+const SentBubble: React.FC = () => {
   const f = useT();
-  const solid = prog(f, SENT, 6);
-  const e = slide(f, DRAFT - 2, 60);
+  if (f < SENT + 2) return null;
+  const e = enter(f, SENT + 2, 22);
   return (
-    <div style={{...e, fontSize: "14.5px", lineHeight: "1.5", color: solid > 0.5 ? "#fff" : "#1f3a2e", borderRadius: "18px", borderBottomRightRadius: "5px", padding: "10px 14px", display: "inline-block", maxWidth: "80%", textAlign: "left", minHeight: 44, minWidth: 60,
-      background: `linear-gradient(160deg,rgba(16,196,110,${solid}),rgba(10,143,78,${solid})), rgba(255,255,255,${0.55 * (1 - solid)})`,
-      border: `1.5px dashed rgba(16,196,110,${0.7 * (1 - solid)})`, boxShadow: `0 6px 16px -8px rgba(12,154,85,${0.5 * solid})`}}>
-      <Typed text={DRAFT_TEXT} at={DRAFT} cps={26} caret={f < SENT} />
+    <div style={{...e, fontSize: "14.5px", lineHeight: "1.5", color: "#fff", borderRadius: "18px", borderBottomRightRadius: "5px", padding: "10px 14px", display: "inline-block", maxWidth: "80%", textAlign: "left", background: "linear-gradient(160deg,#10c46e,#0a8f4e)", boxShadow: "0 6px 16px -8px rgba(12,154,85,.5)"}}>
+      {DRAFT_TEXT}
+    </div>
+  );
+};
+
+const ROWS = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+
+/** iOS-style keyboard; the key for the character just typed lights up. */
+const Keyboard: React.FC = () => {
+  const f = useT();
+  const open = prog(f, KB_OPEN, 10) * (1 - prog(f, SENT + 2, 10));
+  const n = [...DRAFT_TEXT].length;
+  const typedN = Math.min(n, Math.max(0, Math.floor(((f - DRAFT) / 30) * CPS)));
+  const ch = f >= DRAFT && f < DRAFT_DONE && typedN > 0 ? [...DRAFT_TEXT][typedN - 1].toUpperCase() : "";
+  const key = (label: string, w: number | string = 31, extra: React.CSSProperties = {}) => {
+    const hit = label === ch || (label === "space" && ch === " ");
+    return (
+      <div key={label} style={{width: w, height: 40, borderRadius: 6, background: hit ? "#c7cdd4" : "#fff", boxShadow: "0 1px 0 rgba(0,0,0,.28)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: label.length > 1 ? 13 : 18, color: "#111", scale: hit ? "1.08" : "1", ...extra}}>
+        {label}
+      </div>
+    );
+  };
+  if (open <= 0) return null;
+  const H = 214;
+  return (
+    <div style={{flex: "none", height: H * open, overflow: "hidden", background: "rgba(206,211,217,.92)", backdropFilter: "blur(20px)"}}>
+      <div style={{height: H, padding: "8px 3px 0", display: "flex", flexDirection: "column", gap: 10, alignItems: "center"}}>
+        <div style={{display: "flex", gap: 6}}>{[...ROWS[0]].map((k) => key(k))}</div>
+        <div style={{display: "flex", gap: 6}}>{[...ROWS[1]].map((k) => key(k))}</div>
+        <div style={{display: "flex", gap: 6}}>
+          {key("⇧", 42, {background: "#adb4bc"})}
+          {[...ROWS[2]].map((k) => key(k))}
+          {key("⌫", 42, {background: "#adb4bc"})}
+        </div>
+        <div style={{display: "flex", gap: 6}}>
+          {key("123", 84, {background: "#adb4bc"})}
+          {key("space", 190)}
+          {key("return", 84, {background: "#adb4bc"})}
+        </div>
+      </div>
     </div>
   );
 };
@@ -64,7 +104,7 @@ export const MessagesScreen: React.FC = () => {
             </div>
           </A>
         </div>
-        <A as="div" fx="slideL" at={11} style={{flex: "1", overflow: "hidden", padding: "16px 22px 8px", display: "flex", flexDirection: "column", gap: "11px"}}>
+        <div style={{flex: "1", minHeight: 0, overflow: "hidden", padding: "16px 22px 8px", display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: "11px"}}>
           <A as="div" fx="fade" at={3} style={{textAlign: "center", fontSize: "11px", color: "#8a9690", fontWeight: "600", fontFamily: "'Geist Mono',monospace", marginBottom: "2px"}}>
             MONDAY · 16 JUN
           </A>
@@ -78,7 +118,7 @@ export const MessagesScreen: React.FC = () => {
               It is! Lovely 4-bedder. Want me to send the full brochure?
             </div>
           </A>
-          <div style={{textAlign: "right"}}>
+          <A as="div" fx="slideL" at={11} style={{textAlign: "right"}}>
             <div style={{display: "inline-flex", alignItems: "center", gap: "9px", borderRadius: "16px", padding: "9px 13px", maxWidth: "84%", textAlign: "left", background: "linear-gradient(150deg,rgba(255,255,255,.7),rgba(255,255,255,.46))", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,.72)"}}>
               <div style={{width: "32px", height: "38px", borderRadius: "7px", background: "linear-gradient(160deg,#e11d48,#fb5e7e)", display: "flex", alignItems: "center", justifyContent: "center", flex: "none"}}>
                 <span style={{fontSize: "8px", fontWeight: "800", color: "#fff"}}>
@@ -94,40 +134,40 @@ export const MessagesScreen: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </A>
           <A as="div" fx="slideR" at={14}>
             <div style={{fontSize: "14.5px", lineHeight: "1.5", color: "#1f3a2e", borderRadius: "18px", borderBottomLeftRadius: "5px", padding: "10px 14px", display: "inline-block", maxWidth: "80%", background: "linear-gradient(150deg,rgba(255,255,255,.74),rgba(255,255,255,.5))", backdropFilter: "blur(14px)", border: "1px solid rgba(255,255,255,.72)"}}>
               Perfect, thank you! Could we view it Saturday?
             </div>
           </A>
           <div style={{textAlign: "right"}}>
-            <DraftBubble />
+            <SentBubble />
           </div>
           <div style={{textAlign: "right", fontSize: "11px", color: "#8a9690", fontWeight: "600", marginTop: "-4px", marginRight: "4px"}}>
-            {f < SENT + 4 ? "AI draft · tap to send" : "Delivered"} {f >= SENT + 4 ? <CheckDraw at={SENT + 4} size={10} color="#0c6b43" width={3.5} /> : null}
+            {f >= SENT + 8 ? <>Delivered <CheckDraw at={SENT + 8} size={10} color="#0c6b43" width={3.5} /></> : null}
           </div>
-        </A>
+        </div>
         <div style={{flex: "none", padding: "6px 18px 0"}}>
           <A as="div" fx="enter" at={18} style={{display: "flex", gap: "8px", alignItems: "center", padding: "0 4px 10px", overflow: "hidden"}}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#0c6b43" style={{flex: "none"}}>
               <path d="M12 2l1.9 5.2L19 9l-5.1 1.8L12 16l-1.9-5.2L5 9l5.1-1.8L12 2z" />
             </svg>
             <span style={{fontSize: "12px", fontWeight: "600", color: "#0c6b43", background: "rgba(16,196,110,.14)", border: "1px solid rgba(16,196,110,.3)", borderRadius: "13px", padding: "7px 12px", whiteSpace: "nowrap"}}>
-              Send a reminder Friday
+              {f >= KB_OPEN && f < SENT ? (f < DRAFT_DONE ? "AI is drafting your reply…" : "AI draft ready") : "Send a reminder Friday"}
             </span>
-            <span style={{fontSize: "12px", fontWeight: "600", color: "#16241d", background: "rgba(255,255,255,.6)", border: "1px solid rgba(255,255,255,.8)", borderRadius: "13px", padding: "7px 12px", whiteSpace: "nowrap"}}>
+            <span style={{opacity: f >= KB_OPEN && f < SENT ? 0 : 1, fontSize: "12px", fontWeight: "600", color: "#16241d", background: "rgba(255,255,255,.6)", border: "1px solid rgba(255,255,255,.8)", borderRadius: "13px", padding: "7px 12px", whiteSpace: "nowrap"}}>
               Share directions
             </span>
           </A>
         </div>
-        <div style={{flex: "none", padding: "0 18px 22px", display: "flex", alignItems: "center", gap: "10px"}}>
+        <div style={{flex: "none", padding: `0 18px ${22 - 14 * prog(f, KB_OPEN, 10) * (1 - prog(f, SENT + 2, 10))}px`, display: "flex", alignItems: "flex-end", gap: "10px"}}>
           <div style={{width: "44px", height: "44px", borderRadius: "50%", background: "linear-gradient(150deg,rgba(255,255,255,.62),rgba(255,255,255,.34))", border: "1px solid rgba(255,255,255,.72)", display: "flex", alignItems: "center", justifyContent: "center", flex: "none"}}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16241d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 5v14M5 12h14" />
             </svg>
           </div>
-          <div style={{flex: "1", height: "44px", borderRadius: "22px", background: "linear-gradient(150deg,rgba(255,255,255,.66),rgba(255,255,255,.4))", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,.74)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.9)", display: "flex", alignItems: "center", padding: "0 16px", fontSize: "14px", color: "#8a9690"}}>
-            Text message…
+          <div style={{flex: "1", minHeight: "44px", height: "auto", lineHeight: "1.35", borderRadius: "22px", background: "linear-gradient(150deg,rgba(255,255,255,.66),rgba(255,255,255,.4))", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,.74)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.9)", display: "flex", alignItems: "center", padding: "11px 16px", fontSize: "14px", color: "#8a9690"}}>
+            {f >= DRAFT && f < SENT ? <span style={{color: "#16241d"}}><Typed text={DRAFT_TEXT} at={DRAFT} cps={CPS} caret /></span> : f >= KB_OPEN && f < SENT ? <span style={{color: "#16241d"}}><Typed text="" at={0} caret /></span> : "Text message…"}
           </div>
           <div style={{position: "relative", scale: `${interpolate(f, [SENT - 3, SENT, SENT + 8], [1, 0.88, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"})}`, width: "44px", height: "44px", borderRadius: "50%", background: "linear-gradient(180deg,#10c46e,#0a8f4e)", display: "flex", alignItems: "center", justifyContent: "center", flex: "none", boxShadow: "0 8px 18px -8px rgba(12,154,85,.55)"}}>
             <Ripple at={SENT} size={44} />
@@ -136,6 +176,7 @@ export const MessagesScreen: React.FC = () => {
             </svg>
           </div>
         </div>
+        <Keyboard />
       </div>
     </div>
   </div>

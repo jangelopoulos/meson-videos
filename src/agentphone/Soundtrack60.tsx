@@ -1,47 +1,49 @@
 import React from "react";
 import { Audio, interpolate, Sequence, staticFile } from "remotion";
 import { CUTS_60 as K, S1, S2 } from "./cuts60";
+import { DRAFT, DRAFT_DONE, SENT as SENT_AT } from "./screens/messages";
 
 const sec = (s: number) => Math.round(s * 30);
 
-// Voiceover (ElevenLabs, "Becca", one take split into lines), each line
+// Voiceover (ElevenLabs, "Charlotte", one take split into lines), each line
 // placed in its section. Times in seconds.
 export const VO_LINES: [file: string, at: number, dur: number, text: string][] = [
-  ["01", 0.2, 2.52, "On average, you make forty calls a day."],
-  ["02", 3.0, 1.96, "But barely any of it gets logged properly."],
-  ["03", 7.85, 1.03, "Meet AgentPhone."],
-  ["04", 9.6, 3.32, "Know exactly who's calling, with context from your CRM."],
-  ["05", 13.9, 4.09, "Every call is transcribed live, picking out the details that matter as you talk."],
-  ["06", 20.7, 5.51, "Hang up, and the summary's already written. Tasks captured, and logged straight to your CRM."],
-  ["07", 28.3, 3.47, "Get AI coaching and insights on every call, so you keep getting better."],
-  ["08", 33.4, 2.9, "Plus analytics on all your calls, not just a phone log."],
-  ["09", 39.0, 2.43, "Desktop or mobile, it's all in one place."],
-  ["10", 43.0, 3.0, "Texts sit in the same thread, with replies drafted for you."],
-  ["11", 49.2, 2.88, "And it plugs into the CRM you already use, in minutes."],
-  ["12", 55.5, 4.31, "AgentPhone. Every call, in your CRM. Join the waitlist today."],
+  ["01", 0.1, 2.51, "On average, you make forty calls a day."],
+  ["02", 2.8, 2.52, "But barely any of it gets logged properly."],
+  ["03", 7.85, 1.35, "Meet AgentPhone."],
+  ["04", 9.4, 3.88, "Know exactly who's calling, with context from your CRM."],
+  ["05", 13.65, 6.31, "Every call is transcribed live, picking out the details that matter as you talk."],
+  ["06", 20.6, 5.85, "Hang up, and the summary's already written. Tasks captured, and logged straight to your CRM."],
+  ["07", 28.1, 4.64, "Get AI coaching and insights on every call, so you keep getting better."],
+  ["08", 33.4, 3.38, "Plus analytics on all your calls, not just a phone log."],
+  ["09", 38.9, 3.48, "Desktop or mobile, it's all in one place."],
+  ["10", 43.0, 3.88, "Texts sit in the same thread, with replies drafted for you."],
+  ["11", 49.2, 4.04, "And it plugs into the CRM you already use, in minutes."],
+  ["12", 54.8, 5.1, "AgentPhone. Every call, in your CRM. Join the waitlist today."],
 ];
 
-// Sound effects, in frames, derived from the story timings in cuts60.
+// Sound effects, in frames, derived from the story timings in cuts60. Only
+// moments that make a sound in real life get one (answer, hang up, keys,
+// send); the in-phone slides stay silent, and a whoosh only marks the jump
+// between phone and desktop.
 const LIVE = K.call + S1.live;
 const AFTER = K.call + S1.after;
 const RING = K.call + 4;
 const ACCEPT = K.call + 109;
 const END_CALL = LIVE + 186;
-const SLIDES = [
-  LIVE, // → live
-  AFTER, // → summary
-  K.call + S1.score, // → coaching
-  K.expand, // phone grows into desktop
-  K.both, // board shrinks aside
-  K.mobile - 39, // back to the phone
-  K.mobile + S2.messages, // → messages
-  K.mobile + S2.mapping, // → set up
-  K.close - 16, // phone folds into the logo
+const WHOOSH = [
+  K.expand, // phone grows into the desktop
+  K.mobile - 39, // desktop hands back to the phone
 ];
 const LOGGED = AFTER + 134; // "Auto-logged to CRM"
-const SENT = K.mobile + S2.messages + 125; // AI reply sent
 const ZERO = 87; // "0 logged" lands
-// Typing under the live transcript lines and the summary writing out.
+// Messages screen runs at pace 1.6 with a 2-frame lead: screen frame x is
+// shot frame (x - 2) * 1.6.
+const MSG = K.mobile + S2.messages;
+const msg = (x: number) => MSG + Math.round((x - 2) * 1.6);
+const KEYS: [number, number] = [msg(DRAFT), msg(DRAFT_DONE) - msg(DRAFT)];
+const SENT = msg(SENT_AT + 1);
+// Soft typing under the live transcript lines and the summary writing out.
 const TYPING: [number, number][] = [
   [LIVE + 10, 57],
   [LIVE + 74, 56],
@@ -81,16 +83,17 @@ export const Soundtrack60: React.FC<{ voiceover: boolean; music: boolean }> = ({
         ))
       : null}
     <Sfx at={RING} src="ring" volume={0.55} dur={sec(3.5)} />
-    <Sfx at={ACCEPT} src="tap" volume={0.6} dur={sec(1)} />
-    <Sfx at={END_CALL} src="tap" volume={0.6} dur={sec(1)} />
-    {SLIDES.map((at) => (
-      <Sfx key={at} at={at - 2} src="whoosh" volume={0.28} dur={sec(1)} />
+    <Sfx at={ACCEPT} src="answer" volume={0.45} dur={sec(1)} />
+    <Sfx at={END_CALL} src="hangup" volume={0.5} dur={sec(1.5)} />
+    {WHOOSH.map((at) => (
+      <Sfx key={at} at={at - 4} src="whoosh" volume={0.3} dur={sec(1)} />
     ))}
     <Sfx at={ZERO} src="tap" volume={0.7} dur={sec(1)} />
-    <Sfx at={LOGGED} src="chime" volume={0.9} dur={sec(1)} />
-    <Sfx at={SENT} src="chime" volume={0.6} dur={sec(1)} />
+    <Sfx at={LOGGED} src="chime" volume={0.7} dur={sec(1)} />
     {TYPING.map(([at, len]) => (
-      <Sfx key={at} at={at} src="typing" volume={0.45} dur={len} loop />
+      <Sfx key={at} at={at} src="typing" volume={0.35} dur={len} loop />
     ))}
+    <Sfx at={KEYS[0]} src="keys" volume={0.6} dur={KEYS[1]} loop />
+    <Sfx at={SENT} src="sent" volume={0.7} dur={sec(1)} />
   </>
 );
