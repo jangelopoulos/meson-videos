@@ -5,21 +5,21 @@ import { DRAFT, DRAFT_DONE, SENT as SENT_AT } from "./screens/messages";
 
 const sec = (s: number) => Math.round(s * 30);
 
-// Voiceover (ElevenLabs, "Charlotte", one take split into lines), each line
+// Voiceover (ElevenLabs v3, "Charlotte", one directed take split into lines), each line
 // placed in its section. Times in seconds.
 export const VO_LINES: [file: string, at: number, dur: number, text: string][] = [
-  ["01", 0.1, 2.51, "On average, you make forty calls a day."],
-  ["02", 2.8, 2.52, "But barely any of it gets logged properly."],
-  ["03", 7.85, 1.35, "Meet AgentPhone."],
-  ["04", 9.4, 3.88, "Know exactly who's calling, with context from your CRM."],
-  ["05", 13.65, 6.31, "Every call is transcribed live, picking out the details that matter as you talk."],
-  ["06", 20.6, 5.85, "Hang up, and the summary's already written. Tasks captured, and logged straight to your CRM."],
-  ["07", 28.1, 4.64, "Get AI coaching and insights on every call, so you keep getting better."],
-  ["08", 33.4, 3.38, "Plus analytics on all your calls, not just a phone log."],
-  ["09", 38.9, 3.48, "Desktop or mobile, it's all in one place."],
-  ["10", 43.0, 3.88, "Texts sit in the same thread, with replies drafted for you."],
-  ["11", 49.2, 4.04, "And it plugs into the CRM you already use, in minutes."],
-  ["12", 54.8, 5.1, "AgentPhone. Every call, in your CRM. Join the waitlist today."],
+  ["01", 0.1, 3.29, "On average, you make forty calls a day."],
+  ["02", 3.5, 3.09, "But barely any of it gets logged properly."],
+  ["03", 7.85, 1.61, "Meet AgentPhone."],
+  ["04", 9.55, 3.83, "Know exactly who's calling, with context from your CRM."],
+  ["05", 13.65, 4.66, "Every call is transcribed live, picking out the details that matter as you talk."],
+  ["06", 20.6, 6.33, "Hang up, and the summary's already written. Tasks captured, and logged straight to your CRM."],
+  ["07", 28.1, 4.51, "Get AI coaching and insights on every call, so you keep getting better."],
+  ["08", 33.2, 3.98, "Plus analytics on all your calls, not just a phone log."],
+  ["09", 38.9, 3.02, "Desktop or mobile, it's all in one place."],
+  ["10", 43.0, 3.58, "Texts sit in the same thread, with replies drafted for you."],
+  ["11", 49.2, 3.67, "And it plugs into the CRM you already use, in minutes."],
+  ["12", 54.8, 5.12, "AgentPhone. Every call, in your CRM. Join the waitlist today."],
 ];
 
 // Sound effects, in frames, derived from the story timings in cuts60. Only

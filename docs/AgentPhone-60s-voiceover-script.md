@@ -1,6 +1,6 @@
 # AgentPhone · 60s voiceover script
 
-Voice: ElevenLabs **Charlotte** (`cvpTJfe9LINpHIOmB2Hp`), `eleven_multilingual_v2`, one take split
+Voice: ElevenLabs **Charlotte** (`cvpTJfe9LINpHIOmB2Hp`), `eleven_v3` with delivery tags (confident, excited, warm, upbeat), one take split
 into lines. Music: ElevenLabs Music v2.5, 60s instrumental, 124 BPM. SFX: ElevenLabs text-to-sound
 (ring, answer, hang up, whoosh, keyboard, sent, chime, typing). Files live in `public/audio/`;
 placement is in `src/agentphone/Soundtrack60.tsx`.
