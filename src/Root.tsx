@@ -1,7 +1,7 @@
 import "./index.css";
 import { Composition, Folder } from "remotion";
 import { AgentPhoneIntro, IntroProps } from "./agentphone/Intro";
-import { AgentPhoneIntro60, DURATION_60, Intro60Props } from "./agentphone/Intro60";
+import { AgentPhoneIntro60, AgentPhoneSocial60, DURATION_60, Intro60Props, SOCIAL_FROM } from "./agentphone/Intro60";
 import { ColdOpenShot } from "./agentphone/shots/ColdOpen";
 import { DialerShot } from "./agentphone/shots/Dialer";
 import { MappingShot } from "./agentphone/shots/Mapping";
@@ -48,6 +48,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition id="AgentPhone-60-NoSupers" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1920} height={1080} defaultProps={{ ...props60, supers: "none" as const, voiceover: false }} />
         <Composition id="AgentPhone-60-Muted" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1920} height={1080} defaultProps={{ ...props60, supers: "muted" as const }} />
         <Composition id="AgentPhone-60-Vertical" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1080} height={1920} defaultProps={props60} />
+        <Composition id="AgentPhone-Social-Vertical" component={AgentPhoneSocial60} durationInFrames={DURATION_60 - SOCIAL_FROM} fps={30} width={1080} height={1920} defaultProps={{ ...props60, from: SOCIAL_FROM }} />
       </Folder>
       <Folder name="AgentPhone-Shots">
         <Composition id="Shot-ColdOpen" component={ColdOpenShot} durationInFrames={189} fps={30} width={1920} height={1080} />

@@ -51,10 +51,22 @@ const TYPING: [number, number][] = [
   [AFTER + 42, 60],
 ];
 
-const voFrames = VO_LINES.map(([, at, dur]) => [sec(at), sec(at + dur)] as const);
+/**
+ * VO for a cut that starts `from` frames in (social version): lines that
+ * would start before the cut are dropped, except "Meet AgentPhone", which
+ * moves to open the cut.
+ */
+const voLines = (from: number) =>
+  from === 0
+    ? VO_LINES
+    : VO_LINES.filter(([file, at]) => file === "03" || sec(at) >= from).map(
+        ([file, at, dur, text]) => [file, file === "03" ? from / 30 + 0.02 : at, dur, text] as (typeof VO_LINES)[number],
+      );
+
 /** Music ducks under the voice, with short ramps. */
-const musicVolume = (f: number, withVo: boolean) => {
-  const base = interpolate(f, [0, 12, sec(57.5), sec(60)], [0, 0.62, 0.62, 0.5], {
+const musicVolume = (f: number, withVo: boolean, from: number, voFrames: (readonly [number, number])[]) => {
+  const fadeIn = from === 0 ? [0, 12] : [from, from + 3];
+  const base = interpolate(f, [fadeIn[0], fadeIn[1], sec(57.5), sec(60)], [0, 0.62, 0.62, 0.5], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
@@ -72,28 +84,32 @@ const Sfx: React.FC<{ at: number; src: string; volume: number; dur?: number; loo
   </Sequence>
 );
 
-export const Soundtrack60: React.FC<{ voiceover: boolean; music: boolean }> = ({ voiceover, music }) => (
-  <>
-    {music ? <Audio src={staticFile("audio/music.mp3")} volume={(f) => musicVolume(f, voiceover)} /> : null}
-    {voiceover
-      ? VO_LINES.map(([file, at, dur]) => (
-          <Sequence key={file} from={sec(at)} durationInFrames={sec(dur) + 6} layout="none" name={`VO ${file}`}>
-            <Audio src={staticFile(`audio/vo/${file}.wav`)} volume={1} />
-          </Sequence>
-        ))
-      : null}
-    <Sfx at={RING} src="ring" volume={0.55} dur={sec(3.5)} />
-    <Sfx at={ACCEPT} src="answer" volume={0.45} dur={sec(1)} />
-    <Sfx at={END_CALL} src="hangup" volume={0.5} dur={sec(1.5)} />
-    {WHOOSH.map((at) => (
-      <Sfx key={at} at={at - 4} src="whoosh" volume={0.3} dur={sec(1)} />
-    ))}
-    <Sfx at={ZERO} src="tap" volume={0.7} dur={sec(1)} />
-    <Sfx at={LOGGED} src="chime" volume={0.7} dur={sec(1)} />
-    {TYPING.map(([at, len]) => (
-      <Sfx key={at} at={at} src="typing" volume={0.35} dur={len} loop />
-    ))}
-    <Sfx at={KEYS[0]} src="keys" volume={0.6} dur={KEYS[1]} loop />
-    <Sfx at={SENT} src="sent" volume={0.7} dur={sec(1)} />
-  </>
-);
+export const Soundtrack60: React.FC<{ voiceover: boolean; music: boolean; from?: number }> = ({ voiceover, music, from = 0 }) => {
+  const lines = voLines(from);
+  const voFrames = lines.map(([, at, dur]) => [sec(at), sec(at + dur)] as const);
+  return (
+    <>
+      {music ? <Audio src={staticFile("audio/music.mp3")} volume={(f) => musicVolume(f, voiceover, from, voFrames)} /> : null}
+      {voiceover
+        ? lines.map(([file, at, dur]) => (
+            <Sequence key={file} from={sec(at)} durationInFrames={sec(dur) + 6} layout="none" name={`VO ${file}`}>
+              <Audio src={staticFile(`audio/vo/${file}.wav`)} volume={1} />
+            </Sequence>
+          ))
+        : null}
+      <Sfx at={RING} src="ring" volume={0.55} dur={sec(3.5)} />
+      <Sfx at={ACCEPT} src="answer" volume={0.45} dur={sec(1)} />
+      <Sfx at={END_CALL} src="hangup" volume={0.5} dur={sec(1.5)} />
+      {WHOOSH.map((at) => (
+        <Sfx key={at} at={at - 4} src="whoosh" volume={0.3} dur={sec(1)} />
+      ))}
+      <Sfx at={ZERO} src="tap" volume={0.7} dur={sec(1)} />
+      <Sfx at={LOGGED} src="chime" volume={0.7} dur={sec(1)} />
+      {TYPING.map(([at, len]) => (
+        <Sfx key={at} at={at} src="typing" volume={0.35} dur={len} loop />
+      ))}
+      <Sfx at={KEYS[0]} src="keys" volume={0.6} dur={KEYS[1]} loop />
+      <Sfx at={SENT} src="sent" volume={0.7} dur={sec(1)} />
+    </>
+  );
+};

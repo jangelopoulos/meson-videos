@@ -39,6 +39,8 @@ export type Intro60Props = {
   voiceover: boolean;
   /** Music bed and sound effects. */
   music: boolean;
+  /** Social cut: frame of the full 60s timeline this version starts on. */
+  from?: number;
 };
 
 const K = CUTS_60;
@@ -69,7 +71,7 @@ const MUTED: SuperCue[] = [
 const SCORE_PACE = 1.6;
 const SCORE_LEAD = 4;
 
-export const AgentPhoneIntro60: React.FC<Intro60Props> = ({ supers, url, voiceover, music }) => {
+export const AgentPhoneIntro60: React.FC<Intro60Props> = ({ supers, url, voiceover, music, from = 0 }) => {
   const insightsLen = K.both - K.insights;
   const shots: [string, number, number, React.ReactNode][] = [
     ["Cold open", K.cold, K.logo, <ColdOpenShot muted={supers === "muted"} />],
@@ -163,7 +165,19 @@ export const AgentPhoneIntro60: React.FC<Intro60Props> = ({ supers, url, voiceov
         </StageClock.Provider>
       </Sequence>
       {supers === "none" ? null : <Supers cues={supers === "muted" ? MUTED : VO} />}
-      <Soundtrack60 voiceover={voiceover && supers !== "muted"} music={music} />
+      <Soundtrack60 voiceover={voiceover && supers !== "muted"} music={music} from={from} />
     </AbsoluteFill>
+  );
+};
+
+/** Social cut: opens on the frame the pill starts turning into the logo. */
+export const SOCIAL_FROM = 240;
+
+export const AgentPhoneSocial60: React.FC<Intro60Props> = (props) => {
+  const from = props.from ?? SOCIAL_FROM;
+  return (
+    <Sequence from={-from}>
+      <AgentPhoneIntro60 {...props} from={from} />
+    </Sequence>
   );
 };
