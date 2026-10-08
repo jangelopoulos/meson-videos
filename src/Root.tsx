@@ -49,6 +49,7 @@ export const RemotionRoot: React.FC = () => {
         <Composition id="AgentPhone-60-Muted" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1920} height={1080} defaultProps={{ ...props60, supers: "muted" as const }} />
         <Composition id="AgentPhone-60-Vertical" component={AgentPhoneIntro60} durationInFrames={DURATION_60} fps={30} width={1080} height={1920} defaultProps={props60} />
         <Composition id="AgentPhone-Social-Vertical" component={AgentPhoneSocial60} durationInFrames={DURATION_60 - SOCIAL_FROM} fps={30} width={1080} height={1920} defaultProps={{ ...props60, from: SOCIAL_FROM }} />
+        <Composition id="AgentPhone-Social-Landscape" component={AgentPhoneSocial60} durationInFrames={DURATION_60 - SOCIAL_FROM} fps={30} width={1920} height={1080} defaultProps={{ ...props60, from: SOCIAL_FROM }} />
       </Folder>
       <Folder name="AgentPhone-Shots">
         <Composition id="Shot-ColdOpen" component={ColdOpenShot} durationInFrames={189} fps={30} width={1920} height={1080} />
