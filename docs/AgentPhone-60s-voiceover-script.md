@@ -1,6 +1,6 @@
 # AgentPhone · 60s voiceover script
 
-Voice: ElevenLabs **Becca** (`9KesAUJoZzq3yyT2bJ3G`, bright Australian), `eleven_v3` with delivery tags (confident, excited, warm, upbeat), one take split
+Voice: ElevenLabs **Sunny** (`VyyyOgRmsqOzaZXnKWnI`, Australian female), `eleven_v3` with light direction (confident open, warm on the brand lines), one take split
 into lines. Music: ElevenLabs Music v2.5, 60s instrumental, 124 BPM. SFX: ElevenLabs text-to-sound
 (ring, answer, hang up, whoosh, keyboard, sent, chime, typing). Files live in `public/audio/`;
 placement is in `src/agentphone/Soundtrack60.tsx`.
