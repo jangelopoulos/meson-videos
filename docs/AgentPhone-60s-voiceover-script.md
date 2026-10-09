@@ -2,7 +2,7 @@
 
 Voice: ElevenLabs **Sunny** (`VyyyOgRmsqOzaZXnKWnI`, Australian female), `eleven_v3` with light direction (confident open, warm on the brand lines), one take split
 into lines. Music: ElevenLabs Music v2.5, 60s instrumental, 124 BPM. SFX: ElevenLabs text-to-sound
-(ring, answer, hang up, whoosh, keyboard, sent, chime, typing). Files live in `public/audio/`;
+(ring, a short synthesized boop on answer, hang up, whoosh, keyboard, sent, chime, typing). Files live in `public/audio/`;
 placement is in `src/agentphone/Soundtrack60.tsx`.
 
 | Time | Section | Voiceover |

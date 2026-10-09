@@ -98,7 +98,7 @@ export const Soundtrack60: React.FC<{ voiceover: boolean; music: boolean; from?:
           ))
         : null}
       <Sfx at={RING} src="ring" volume={0.55} dur={sec(3.5)} />
-      <Sfx at={ACCEPT} src="answer" volume={0.45} dur={sec(1)} />
+      <Sfx at={ACCEPT} src="answer" volume={0.6} dur={sec(0.5)} />
       <Sfx at={END_CALL} src="hangup" volume={0.5} dur={sec(1.5)} />
       {WHOOSH.map((at) => (
         <Sfx key={at} at={at - 4} src="whoosh" volume={0.3} dur={sec(1)} />
