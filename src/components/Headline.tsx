@@ -1,6 +1,6 @@
 import React from "react";
 import { Easing, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
-import { colors, fonts, motion, typography } from "../brand";
+import { fonts, gradients, motion, typography } from "../brand";
 import { ease } from "../lib/anim";
 
 type Props = {
@@ -63,7 +63,7 @@ export const Headline: React.FC<Props> = ({
               translate: `0 ${(1 - p) * 0.28}em`,
               filter:
                 p < 1 ? `blur(${(1 - p) * motion.wordBlur}px)` : undefined,
-              color: wi >= hl[0] && wi < hl[1] ? colors.signal : undefined,
+              ...(wi >= hl[0] && wi < hl[1] ? gradientText : {}),
             }}
           >
             {w}
@@ -132,6 +132,16 @@ export const Headline: React.FC<Props> = ({
       })}
     </div>
   );
+};
+
+/** Orange gradient fill; padding keeps descenders inside the painted box. */
+const gradientText: React.CSSProperties = {
+  backgroundImage: gradients.signalText,
+  WebkitBackgroundClip: "text",
+  backgroundClip: "text",
+  color: "transparent",
+  padding: "0 0.04em 0.14em",
+  margin: "0 -0.04em -0.14em",
 };
 
 /** Word index range [start, end) matching the highlight phrase, if any. */

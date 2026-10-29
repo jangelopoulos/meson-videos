@@ -2,7 +2,6 @@ import React from "react";
 import { AbsoluteFill, Easing } from "remotion";
 import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
-import { wipe } from "@remotion/transitions/wipe";
 import { colors } from "./brand";
 import { AiAtWork } from "./scenes/AiAtWork";
 import { Connect } from "./scenes/Connect";
@@ -16,8 +15,8 @@ import { sceneFrames, transitionFrames } from "./timeline";
 // import { Audio } from "@remotion/media";
 // import { staticFile } from "remotion";
 
-const wipeTiming = linearTiming({
-  durationInFrames: transitionFrames.wipe,
+const fadeTiming = linearTiming({
+  durationInFrames: transitionFrames.fade,
   easing: Easing.inOut(Easing.cubic),
 });
 
@@ -38,7 +37,7 @@ export const PinaxExplainer: React.FC = () => {
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition
           presentation={fade()}
-          timing={linearTiming({ durationInFrames: transitionFrames.fade })}
+          timing={fadeTiming}
         />
         <TransitionSeries.Sequence durationInFrames={f.problem}>
           <Problem duration={f.problem} />
@@ -47,8 +46,8 @@ export const PinaxExplainer: React.FC = () => {
           <Cost duration={f.cost} />
         </TransitionSeries.Sequence>
         <TransitionSeries.Transition
-          presentation={wipe({ direction: "from-left" })}
-          timing={wipeTiming}
+          presentation={fade()}
+          timing={fadeTiming}
         />
         <TransitionSeries.Sequence durationInFrames={f.connect}>
           <Connect duration={f.connect} />
@@ -59,10 +58,6 @@ export const PinaxExplainer: React.FC = () => {
         <TransitionSeries.Sequence durationInFrames={f.stick}>
           <MakeItStick duration={f.stick} />
         </TransitionSeries.Sequence>
-        <TransitionSeries.Transition
-          presentation={wipe({ direction: "from-left" })}
-          timing={wipeTiming}
-        />
         <TransitionSeries.Sequence durationInFrames={f.outro}>
           <Outro />
         </TransitionSeries.Sequence>

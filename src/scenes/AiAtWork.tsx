@@ -1,28 +1,18 @@
 import React from "react";
-import {
-  AbsoluteFill,
-  interpolate,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { beats, colors, copy, sec } from "../brand";
 import { Callout } from "../components/Callout";
 import { Headline } from "../components/Headline";
-import {
-  DOT_ROUTE,
-  HUB_R,
-  Mechanism,
-  SATELLITES,
-} from "../components/Mechanism";
 import { ease, exitFade } from "../lib/anim";
-import { pointOnPolyline, polylineLength } from "../lib/gears";
 import { useLayout } from "../lib/layout";
+import { hubLight, pulseTrails } from "../lib/pulses";
 import { mechanismAngle } from "../lib/spin";
 import { sceneStart } from "../timeline";
-import { HubTiles } from "./HubTiles";
 import { mechPose, mixPose } from "./mech";
+import { MechStage } from "./MechStage";
 
-const ROUTE_LENGTH = polylineLength(DOT_ROUTE);
+/** Absolute frame at which the light pulses start (shared with later scenes). */
+export const PULSE_START = sceneStart.ai + sec(beats.ai.pulses);
 
 export const AiAtWork: React.FC<{ duration: number }> = ({ duration }) => {
   const frame = useCurrentFrame();
@@ -30,44 +20,27 @@ export const AiAtWork: React.FC<{ duration: number }> = ({ duration }) => {
   const layout = useLayout();
   const { vertical, type } = layout;
   const b = beats.ai;
+  const abs = sceneStart.ai + frame;
 
-  const move = ease(frame, fps, sec(b.move), sec(1.3));
+  // The system tilts back like a product shot while the AI lights it up.
+  const move = ease(frame, fps, 0, sec(1.6));
   const pose = mixPose(
     mechPose(layout, "connect"),
     mechPose(layout, "ai"),
     move,
   );
-  const angle = mechanismAngle(sceneStart.ai + frame);
-
-  // The Signal dot travels the route at constant speed, starting and ending
-  // at the core so it hands over cleanly to the neighbouring scenes.
-  const dist = interpolate(
-    frame,
-    [sec(b.dot), sec(b.dotEnd)],
-    [0, ROUTE_LENGTH],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    },
-  );
-  const dot = pointOnPolyline(DOT_ROUTE, dist);
-  const pulse = (i: number) => {
-    const s = SATELLITES[i];
-    const d = Math.hypot(dot.x - s.x, dot.y - s.y);
-    return 1 + 0.14 * Math.max(0, 1 - d / HUB_R);
-  };
-
+  const trails = pulseTrails(abs, PULSE_START);
   const textOut = exitFade(frame, duration);
+
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.white }}>
-      <Mechanism
-        cx={pose.cx}
-        cy={pose.cy}
-        scale={pose.scale}
-        angle={angle}
-        dot={dot}
+    <AbsoluteFill style={{ backgroundColor: colors.black }}>
+      <MechStage
+        pose={pose}
+        angle={mechanismAngle(abs)}
+        glow={1}
+        pulses={trails}
+        lit={(i) => hubLight(trails, i)}
       />
-      <HubTiles pose={pose} pulse={pulse} />
 
       <div
         style={{
@@ -76,22 +49,18 @@ export const AiAtWork: React.FC<{ duration: number }> = ({ duration }) => {
           flexDirection: "column",
           opacity: textOut,
           ...(vertical
-            ? {
-                left: layout.marginX,
-                right: layout.marginX,
-                top: 1210,
-                gap: 34,
-              }
-            : { left: 1010, width: 780, top: 230, gap: 52 }),
+            ? { left: 70, right: 70, top: 1120, gap: 24 }
+            : { left: 1070, width: 760, top: 140, gap: 24 }),
         }}
       >
         {copy.ai.callouts.map((c, i) => (
           <Callout
             key={i}
             icon={c.icon}
+            title={c.title}
             text={c.text}
             fontSize={type.callout}
-            progress={ease(frame, fps, sec(b.callouts[i]), sec(0.7))}
+            progress={ease(frame, fps, sec(b.callouts[i]), sec(0.8))}
           />
         ))}
       </div>
@@ -101,16 +70,17 @@ export const AiAtWork: React.FC<{ duration: number }> = ({ duration }) => {
           opacity: textOut,
           padding: `${layout.marginTop}px ${layout.marginX}px ${layout.marginBottom}px`,
           justifyContent: vertical ? "flex-start" : "flex-end",
-          alignItems: "center",
+          alignItems: vertical ? "center" : "flex-start",
         }}
       >
         <Headline
           text={copy.ai.text}
+          highlight={copy.ai.highlight}
           fontSize={type.headline}
-          color={colors.black}
-          align="center"
+          color={colors.white}
+          align={vertical ? "center" : "left"}
           delay={sec(b.text)}
-          maxWidth={vertical ? 900 : 1500}
+          maxWidth={vertical ? 900 : 1700}
         />
       </AbsoluteFill>
     </AbsoluteFill>

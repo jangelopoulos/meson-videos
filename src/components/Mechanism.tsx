@@ -1,17 +1,18 @@
-import React from "react";
+import React, { useId } from "react";
 import { AbsoluteFill } from "remotion";
 import { colors, strokes } from "../brand";
 import { GearSpec, solveTrain } from "../lib/gears";
 import { Gear } from "./Gear";
 
 /**
- * The Pinax "mechanism": a centre gear driving six satellites, a ring of
- * fine dial ticks behind, and connecting lines between the hubs.
+ * The Pinax "mechanism": a centre gear driving six satellites, a dial of
+ * fine ticks behind, connecting lines between the hubs, and a core that
+ * glows when the system is alive. A nod to the Antikythera mechanism.
  * All geometry is in mechanism units and scaled to px at render time.
  */
 export const MODULE = 8;
 export const HUB_R = 46;
-export const TILE = 58;
+export const TILE = 64;
 export const CORE_HUB_R = 34;
 export const EXTENT = 404; // outer radius of the dial, in units
 
@@ -36,27 +37,10 @@ const specs: GearSpec[] = [
 export const GEARS = solveTrain(specs, MODULE);
 export const SATELLITES = GEARS.slice(1);
 
-/** Route the Signal dot travels: through every hub and back to the core. */
-export const DOT_ROUTE = [
-  { x: 0, y: 0 },
-  SATELLITES[0],
-  SATELLITES[1],
-  { x: 0, y: 0 },
-  SATELLITES[2],
-  SATELLITES[3],
-  { x: 0, y: 0 },
-  SATELLITES[4],
-  SATELLITES[5],
-  { x: 0, y: 0 },
-].map(({ x, y }) => ({ x, y }));
+type P = { x: number; y: number };
 
-/** Lines between hubs, trimmed to the hub rings. */
-const LINKS: {
-  a: { x: number; y: number };
-  b: { x: number; y: number };
-  ra: number;
-  rb: number;
-}[] = [
+/** Hub-to-hub links: six spokes from the core, then the outer ring. */
+export const LINKS: { a: P; b: P; ra: number; rb: number }[] = [
   ...SATELLITES.map((s) => ({
     a: { x: 0, y: 0 },
     b: s,
@@ -71,6 +55,22 @@ const LINKS: {
   })),
 ];
 
+/** Closed loops the light pulses travel (in mechanism units). */
+export const PULSE_ROUTES: P[][] = [
+  [{ x: 0, y: 0 }, SATELLITES[0], SATELLITES[1], { x: 0, y: 0 }],
+  [{ x: 0, y: 0 }, SATELLITES[2], SATELLITES[3], { x: 0, y: 0 }],
+  [{ x: 0, y: 0 }, SATELLITES[4], SATELLITES[5], { x: 0, y: 0 }],
+  [
+    SATELLITES[1],
+    SATELLITES[2],
+    { x: 0, y: 0 },
+    SATELLITES[5],
+    SATELLITES[0],
+    SATELLITES[1],
+  ],
+  [SATELLITES[3], SATELLITES[4], { x: 0, y: 0 }, SATELLITES[3]],
+].map((r) => r.map(({ x, y }) => ({ x, y })));
+
 export type MechanismProps = {
   cx: number;
   cy: number;
@@ -80,18 +80,13 @@ export type MechanismProps = {
   draw?: {
     rings?: number;
     core?: number;
-    /** Per-satellite draw progress. */
     satellites?: number[];
     lines?: number;
   };
-  gearColor?: string;
-  lineColor?: string;
-  ringColor?: string;
-  /** Signal dot position in mechanism units, or null. */
-  dot?: { x: number; y: number } | null;
-  /** Point colour overriding Signal for the dot (e.g. white in the outro). */
-  dotColor?: string;
-  dotRadius?: number;
+  /** 0..1 intensity of the orange core light. */
+  glow?: number;
+  /** Light pulses: each is a list of points, head first, in mechanism units. */
+  pulses?: P[][];
   opacity?: number;
 };
 
@@ -101,14 +96,11 @@ export const Mechanism: React.FC<MechanismProps> = ({
   scale,
   angle,
   draw = {},
-  gearColor = colors.grey,
-  lineColor = colors.black,
-  ringColor = colors.rule,
-  dot = null,
-  dotColor = colors.signal,
-  dotRadius = 9,
+  glow = 0,
+  pulses = [],
   opacity = 1,
 }) => {
+  const id = useId().replace(/:/g, "");
   const rings = draw.rings ?? 1;
   const lines = draw.lines ?? 1;
   const s = scale;
@@ -117,17 +109,43 @@ export const Mechanism: React.FC<MechanismProps> = ({
   return (
     <AbsoluteFill style={{ opacity }}>
       <svg width="100%" height="100%" style={{ overflow: "visible" }}>
+        <defs>
+          <radialGradient id={`${id}-core`}>
+            <stop offset="0%" stopColor={colors.signalHot} stopOpacity={0.55} />
+            <stop offset="35%" stopColor={colors.signal} stopOpacity={0.22} />
+            <stop offset="100%" stopColor={colors.signal} stopOpacity={0} />
+          </radialGradient>
+          <radialGradient id={`${id}-pulse`}>
+            <stop offset="0%" stopColor={colors.signalHot} stopOpacity={0.9} />
+            <stop offset="100%" stopColor={colors.signal} stopOpacity={0} />
+          </radialGradient>
+        </defs>
         <g transform={`translate(${cx} ${cy})`}>
+          {glow > 0 ? (
+            <circle
+              r={EXTENT * 1.25 * s * (0.6 + 0.4 * glow)}
+              fill={`url(#${id}-core)`}
+              opacity={glow}
+            />
+          ) : null}
+
           {/* Dial: concentric rings with fine ticks, counter-rotating slowly. */}
           {rings > 0 ? (
             <g
               fill="none"
-              stroke={ringColor}
               strokeWidth={strokes.gear}
               transform={`rotate(${-angle * 0.25})`}
             >
-              <circle r={EXTENT * s} {...dash(rings)} />
-              <circle r={(EXTENT - 30) * s} {...dash(rings)} />
+              <circle
+                r={EXTENT * s}
+                stroke="rgba(255,255,255,0.16)"
+                {...dash(rings)}
+              />
+              <circle
+                r={(EXTENT - 30) * s}
+                stroke="rgba(255,255,255,0.10)"
+                {...dash(rings)}
+              />
               {Array.from({ length: 120 }).map((_, i) => {
                 const a = (i / 120) * Math.PI * 2;
                 const long = i % 10 === 0;
@@ -140,6 +158,9 @@ export const Mechanism: React.FC<MechanismProps> = ({
                     y1={Math.sin(a) * r0}
                     x2={Math.cos(a) * r1}
                     y2={Math.sin(a) * r1}
+                    stroke={
+                      long ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.18)"
+                    }
                   />
                 ) : null;
               })}
@@ -155,7 +176,7 @@ export const Mechanism: React.FC<MechanismProps> = ({
               module={MODULE}
               scale={s}
               rotation={g.ratio * angle + g.phase}
-              color={gearColor}
+              color="rgba(255,255,255,0.34)"
               draw={
                 i === 0 ? (draw.core ?? 1) : (draw.satellites?.[i - 1] ?? 1)
               }
@@ -164,10 +185,9 @@ export const Mechanism: React.FC<MechanismProps> = ({
             />
           ))}
 
-          {/* Connecting lines between hubs. */}
           {lines > 0 ? (
             <g
-              stroke={lineColor}
+              stroke={colors.lineStrong}
               strokeWidth={strokes.line}
               strokeLinecap="round"
             >
@@ -194,13 +214,42 @@ export const Mechanism: React.FC<MechanismProps> = ({
             </g>
           ) : null}
 
-          {dot ? (
-            <circle
-              cx={dot.x * s}
-              cy={dot.y * s}
-              r={dotRadius}
-              fill={dotColor}
-            />
+          {/* Light pulses with comet trails. */}
+          {pulses.map((trail, pi) => (
+            <g key={pi}>
+              <circle
+                cx={trail[0].x * s}
+                cy={trail[0].y * s}
+                r={34}
+                fill={`url(#${id}-pulse)`}
+                opacity={0.7}
+              />
+              {trail.map((p, ti) => {
+                const t = 1 - ti / trail.length;
+                return (
+                  <circle
+                    key={ti}
+                    cx={p.x * s}
+                    cy={p.y * s}
+                    r={6 * t + 1}
+                    fill={ti === 0 ? colors.signalPale : colors.signalHot}
+                    opacity={ti === 0 ? 1 : t * 0.6}
+                  />
+                );
+              })}
+            </g>
+          ))}
+
+          {/* The core. */}
+          {glow > 0 ? (
+            <>
+              <circle
+                r={22 * s * glow}
+                fill={colors.signal}
+                opacity={0.35 * glow}
+              />
+              <circle r={11 * s * glow + 3} fill={colors.signalPale} />
+            </>
           ) : null}
         </g>
       </svg>

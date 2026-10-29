@@ -6,12 +6,23 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { beats, colors, copy, fonts, sec, typography } from "../brand";
+import {
+  beats,
+  colors,
+  copy,
+  fonts,
+  gradients,
+  sec,
+  typography,
+} from "../brand";
 import { AppTile } from "../components/AppTile";
+import { Glow } from "../components/Glow";
 import { Headline } from "../components/Headline";
 import { PriceTag } from "../components/PriceTag";
 import { ease, exitFade, mix, ramp } from "../lib/anim";
 import { useLayout } from "../lib/layout";
+import { sceneFrames } from "../timeline";
+import { bob } from "./Problem";
 import { CLUSTER_SCALE, jamShake, tilePlan } from "./tiles";
 
 const withCommas = (n: number) =>
@@ -28,7 +39,7 @@ export const Cost: React.FC<{ duration: number }> = ({ duration }) => {
   const c = copy.cost;
   const tiles = tilePlan(layout);
 
-  const jam = ease(frame, fps, sec(b.jam), sec(1.2));
+  const jam = ease(frame, fps, 0, sec(1.2));
   const tagsOut = 1 - ramp(frame, 0, 10);
 
   const value = interpolate(
@@ -55,7 +66,7 @@ export const Cost: React.FC<{ duration: number }> = ({ duration }) => {
     fontWeight: typography.labelWeight,
     fontSize: type.label,
     letterSpacing: typography.labelTracking,
-    color: colors.grey,
+    color: colors.muted,
   } as const;
 
   const counterBlock = (
@@ -97,10 +108,11 @@ export const Cost: React.FC<{ duration: number }> = ({ duration }) => {
           <div
             style={{
               marginTop: type.counter * 0.1,
-              height: 4,
-              borderRadius: 2,
+              height: 6,
+              borderRadius: 3,
               width: `${underline * 100}%`,
-              backgroundColor: colors.signal,
+              backgroundImage: gradients.signalText,
+              boxShadow: "0 0 24px rgba(228,87,30,0.7)",
             }}
           />
         </div>
@@ -113,36 +125,50 @@ export const Cost: React.FC<{ duration: number }> = ({ duration }) => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: colors.black }}>
-      {tiles.map((t, i) => {
-        const shake = jamShake(frame, i, 2.5 * jam);
-        return (
-          <AppTile
-            key={i}
-            icon={t.icon}
-            x={mix(t.mess.x, t.cluster.x, jam) + shake.x}
-            y={mix(t.mess.y, t.cluster.y, jam) + shake.y}
-            size={t.size}
-            rotate={mix(t.mess.rot, t.cluster.rot, jam)}
-            scale={mix(1, CLUSTER_SCALE, jam)}
-            fill={t.primary ? colors.white : colors.grey}
-            color={colors.black}
-          />
-        );
-      })}
-      {tagsOut > 0
-        ? tiles.map((t, i) =>
-            t.label ? (
-              <PriceTag
-                key={`tag-${i}`}
-                text={t.label}
-                x={t.mess.x}
-                y={t.mess.y - t.size / 2 - 14}
-                fontSize={type.label}
-                opacity={tagsOut}
-              />
-            ) : null,
-          )
-        : null}
+      <Glow
+        x={vertical ? layout.width / 2 : 1240}
+        y={vertical ? 1330 : 470}
+        size={vertical ? 1300 : 1500}
+        opacity={underline * 0.45 * exitFade(frame, duration)}
+      />
+      <AbsoluteFill
+        style={{
+          scale: String(interpolate(frame, [0, duration], [1.04, 1.08])),
+        }}
+      >
+        {tiles.map((t, i) => {
+          const shake = jamShake(frame, i, 2.5 * jam);
+          const f = bob(frame + sceneFrames.problem, i);
+          return (
+            <AppTile
+              key={i}
+              icon={t.icon}
+              x={mix(t.mess.x + f.x, t.cluster.x, jam) + shake.x}
+              y={mix(t.mess.y + f.y, t.cluster.y, jam) + shake.y}
+              size={t.size}
+              tone={i}
+              rotate={mix(t.mess.rot, t.cluster.rot, jam)}
+              scale={mix(1, CLUSTER_SCALE, jam)}
+              opacity={t.primary ? 1 : 0.7}
+              blur={t.primary ? 0 : 2.5}
+            />
+          );
+        })}
+        {tagsOut > 0
+          ? tiles.map((t, i) =>
+              t.label ? (
+                <PriceTag
+                  key={`tag-${i}`}
+                  text={t.label}
+                  x={t.mess.x}
+                  y={t.mess.y - t.size / 2 - 14}
+                  fontSize={type.label}
+                  opacity={tagsOut}
+                />
+              ) : null,
+            )
+          : null}
+      </AbsoluteFill>
 
       <AbsoluteFill style={{ opacity: exitFade(frame, duration) }}>
         <div
@@ -156,7 +182,7 @@ export const Cost: React.FC<{ duration: number }> = ({ duration }) => {
                   display: "flex",
                   justifyContent: "center",
                 }
-              : { position: "absolute", top: 290, left: 860 }
+              : { position: "absolute", top: 270, left: 800 }
           }
         >
           {counterBlock}

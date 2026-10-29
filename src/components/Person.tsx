@@ -1,31 +1,41 @@
 import React from "react";
-import { strokes } from "../brand";
+import { colors, gradients } from "../brand";
 
-/** Minimal line-drawn person: head and shoulders. Positioned by centre. */
+/** A team member: a glossy graphite disc with a simple head-and-shoulders glyph. */
 export const Person: React.FC<{
   x: number;
   y: number;
   size: number;
-  color: string;
+  tone?: number;
   opacity?: number;
-}> = ({ x, y, size, color, opacity = 1 }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 40 40"
-    fill="none"
-    stroke={color}
-    strokeWidth={(strokes.icon * 40) / size}
-    strokeLinecap="round"
+  scale?: number;
+}> = ({ x, y, size, tone = 0, opacity = 1, scale = 1 }) => (
+  <div
     style={{
       position: "absolute",
       left: x - size / 2,
       top: y - size / 2,
+      width: size,
+      height: size,
+      borderRadius: "50%",
+      backgroundImage: gradients.icon[tone % gradients.icon.length],
+      border: "1px solid rgba(255,255,255,0.14)",
+      boxShadow: `inset 0 1px 0 rgba(255,255,255,0.18), 0 ${size * 0.12}px ${size * 0.3}px rgba(0,0,0,0.5)`,
+      boxSizing: "border-box",
+      overflow: "hidden",
       opacity,
-      overflow: "visible",
+      scale: String(scale),
     }}
   >
-    <circle cx="20" cy="13" r="7" />
-    <path d="M6 36 C6 27 12 23 20 23 C28 23 34 27 34 36" />
-  </svg>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill={colors.white}
+      opacity={0.85}
+    >
+      <circle cx="20" cy="16" r="6.5" />
+      <path d="M7 40 C7 30 13 25.5 20 25.5 C27 25.5 33 30 33 40 Z" />
+    </svg>
+  </div>
 );

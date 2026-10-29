@@ -2,14 +2,18 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { beats, colors, copy, sec } from "../brand";
 import { Headline } from "../components/Headline";
-import { Mechanism } from "../components/Mechanism";
 import { Person } from "../components/Person";
 import { ease, exitFade } from "../lib/anim";
 import { useLayout } from "../lib/layout";
+import { hubLight, pulseTrails } from "../lib/pulses";
 import { mechanismAngle } from "../lib/spin";
 import { sceneStart } from "../timeline";
-import { HubTiles } from "./HubTiles";
-import { mechPose, mixPose, peopleOffsets, PERSON_SIZE } from "./mech";
+import { PULSE_START } from "./AiAtWork";
+import { mechPose, mixPose, peopleRing } from "./mech";
+import { MechStage } from "./MechStage";
+
+/** Slow orbit of the team around the system, in degrees (absolute frame). */
+export const orbit = (abs: number) => (abs - sceneStart.stick) * 0.07;
 
 export const MakeItStick: React.FC<{ duration: number }> = ({ duration }) => {
   const frame = useCurrentFrame();
@@ -17,39 +21,40 @@ export const MakeItStick: React.FC<{ duration: number }> = ({ duration }) => {
   const layout = useLayout();
   const { vertical, type } = layout;
   const b = beats.stick;
+  const abs = sceneStart.stick + frame;
 
-  const move = ease(frame, fps, sec(b.move), sec(1.3));
-  const target = mechPose(layout, "stick");
-  const pose = mixPose(mechPose(layout, "ai"), target, move);
-  const angle = mechanismAngle(sceneStart.stick + frame);
-  const size = vertical ? PERSON_SIZE.vertical : PERSON_SIZE.landscape;
+  const move = ease(frame, fps, 0, sec(1.4));
+  const pose = mixPose(mechPose(layout, "ai"), mechPose(layout, "stick"), move);
+  const trails = pulseTrails(abs, PULSE_START);
+  const ring = peopleRing(layout);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.white }}>
-      <Mechanism
-        cx={pose.cx}
-        cy={pose.cy}
-        scale={pose.scale}
-        angle={angle}
-        dot={{ x: 0, y: 0 }}
+    <AbsoluteFill style={{ backgroundColor: colors.black }}>
+      <MechStage
+        pose={pose}
+        angle={mechanismAngle(abs)}
+        glow={1}
+        pulses={trails}
+        lit={(i) => hubLight(trails, i)}
       />
-      <HubTiles pose={pose} />
-      {peopleOffsets(layout).map((o, i) => {
+      {ring.angles.map((a0, i) => {
         const p = ease(
           frame,
           fps,
           sec(b.people + i * b.peopleInterval),
-          sec(0.9),
+          sec(1),
         );
-        const away = (1 - p) * 90;
+        const a = ((a0 + orbit(abs)) * Math.PI) / 180;
+        const out = 1 + ((1 - p) * 140) / ring.rx;
         return (
           <Person
             key={i}
-            x={pose.cx + o.x + o.ux * away}
-            y={pose.cy + o.y + o.uy * away}
-            size={size}
-            color={colors.black}
+            x={pose.cx + Math.cos(a) * ring.rx * out}
+            y={pose.cy + Math.sin(a) * ring.ry * out}
+            size={ring.size}
+            tone={i}
             opacity={p}
+            scale={0.7 + 0.3 * p}
           />
         );
       })}
@@ -63,11 +68,12 @@ export const MakeItStick: React.FC<{ duration: number }> = ({ duration }) => {
       >
         <Headline
           text={copy.stick.text}
+          highlight={copy.stick.highlight}
           fontSize={type.headline}
-          color={colors.black}
+          color={colors.white}
           align="center"
           delay={sec(b.text)}
-          maxWidth={vertical ? 900 : 1500}
+          maxWidth={vertical ? 900 : 1600}
         />
       </AbsoluteFill>
     </AbsoluteFill>
