@@ -1,6 +1,6 @@
 # Pinax explainer video
 
-A ~45 second motion graphic explainer for Pinax (pinax.ai), built with Remotion, React and TypeScript.
+A ~47 second, dark, Apple-style motion graphic explainer for Pinax (pinax.ai), built with Remotion, React and TypeScript.
 
 | Composition              | Size      | FPS |
 | ------------------------ | --------- | --- |
@@ -23,7 +23,9 @@ npx remotion render PinaxExplainerVertical out/PinaxExplainerVertical.mp4
 - `src/brand.ts`: colours, fonts, type sizes, scene lengths, beats and all on-screen copy. Edit this first.
 - `src/timeline.ts`: scene order and transitions; computes the total duration.
 - `src/scenes/`: one component per scene (Hook, Problem, Cost, Connect, AiAtWork, MakeItStick, Outro).
-- `src/components/`: `Gear`, `Mechanism`, `AppTile`, `Callout`, `PinaxWordmark`, `Headline`, `Icon`, `Person`, `PriceTag`.
+- `src/components/`: `Gear`, `Mechanism`, `AppTile`, `Callout`, `PinaxWordmark`, `Headline`, `Glow`, `Icon`, `Person`, `PriceTag`.
+- `src/scenes/MechStage.tsx`: the mechanism and its hub icons on a plane that can tilt in 3D.
+- `src/lib/pulses.ts`: the light pulses that travel between tools, driven by the absolute frame so they flow across cuts.
 - `src/lib/gears.ts`: gear-train maths. Meshing gears turn in opposite directions at speeds inversely proportional to their tooth counts, phased so teeth sit in gaps.
 - `public/brand/`: reference SVGs of the wordmark. The video renders the wordmark live with `PinaxWordmark`.
 
