@@ -393,6 +393,7 @@ export const Clusters: React.FC<ShotProps> = ({ dur }) => {
                       name={saas[t]}
                       price={prices[(t * 7) % prices.length]}
                       width={tileW}
+                      solid={clusters.length * 3 > glass.maxBlurredTiles}
                     />
                   </div>
                 ))}
