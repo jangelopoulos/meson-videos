@@ -1,10 +1,10 @@
 import React from "react";
-import { colors, fonts, typography } from "../brand";
+import { colors, fonts } from "../brand";
 
 /**
- * The Pinax wordmark, set live in Schibsted Grotesk 600 so the font is
- * guaranteed in renders. Proportions follow public/brand/pinax-wordmark.svg:
- * ™ at ~18% of the wordmark size, raised 0.583em, with a 0.05em gap.
+ * The Pinax wordmark, set live in Schibsted Grotesk 600. Proportions follow
+ * public/brand/pinax-wordmark.svg: -0.06em tracking, ™ at ~18% size, raised
+ * 0.583em (top-aligned to the ascenders) with a 0.05em gap.
  */
 export const PinaxWordmark: React.FC<{
   size: number;
@@ -13,7 +13,7 @@ export const PinaxWordmark: React.FC<{
 }> = ({ size, color = colors.black, style }) => (
   <div
     style={{
-      fontFamily: fonts.wordmark,
+      fontFamily: fonts.headline,
       fontWeight: 600,
       fontSize: size,
       lineHeight: 1,
@@ -22,7 +22,7 @@ export const PinaxWordmark: React.FC<{
       ...style,
     }}
   >
-    <span style={{ letterSpacing: typography.wordmarkTracking }}>pinax</span>
+    <span style={{ letterSpacing: "-0.06em" }}>pinax</span>
     <span
       style={{
         fontSize: size * 0.183,

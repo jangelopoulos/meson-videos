@@ -1,9 +1,9 @@
 import { useVideoConfig } from "remotion";
-import { typeScale } from "../brand";
+import { type as typeScale } from "../brand";
 
 export type Layout = ReturnType<typeof useLayout>;
 
-/** Switches layout on the video's aspect ratio (landscape vs vertical). */
+/** Landscape vs vertical layout, from the video's width and height. */
 export const useLayout = () => {
   const { width, height } = useVideoConfig();
   const vertical = height > width;
@@ -11,11 +11,14 @@ export const useLayout = () => {
     width,
     height,
     vertical,
-    type: vertical ? typeScale.vertical : typeScale.landscape,
-    /** Horizontal safe margin. */
-    marginX: vertical ? 90 : 140,
-    /** Top / bottom safe margins (vertical leaves room for app UI). */
-    marginTop: vertical ? 220 : 110,
-    marginBottom: vertical ? 300 : 110,
+    cx: width / 2,
+    cy: height / 2,
+    t: vertical ? typeScale.vertical : typeScale.landscape,
+    /** Safe margins (vertical leaves room for platform UI). */
+    marginX: vertical ? 80 : 120,
+    marginTop: vertical ? 240 : 90,
+    marginBottom: vertical ? 340 : 90,
+    /** Max width for centred text. */
+    textWidth: vertical ? 920 : 1680,
   };
 };
