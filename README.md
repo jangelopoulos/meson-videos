@@ -1,32 +1,31 @@
-# Pinax explainer video
+# Pinax videos
 
-A ~47 second, dark, Apple-style motion graphic explainer for Pinax (pinax.ai), built with Remotion, React and TypeScript.
+Motion graphics for Pinax (pinax.ai), built with Remotion, React and TypeScript.
 
-| Composition              | Size      | FPS |
-| ------------------------ | --------- | --- |
-| `PinaxExplainer`         | 1920x1080 | 30  |
-| `PinaxExplainerVertical` | 1080x1920 | 30  |
-
-Both compositions use the same scene components. The layout switches on the video's aspect ratio (`src/lib/layout.ts`).
+| Composition              | Size      | What                                   |
+| ------------------------ | --------- | -------------------------------------- |
+| `PinaxAd`                | 1920x1080 | 45s beat-locked launch ad (120 BPM)    |
+| `PinaxAdVertical`        | 1080x1920 | Same ad, mobile layout                 |
+| `PinaxExplainer`         | 1920x1080 | Earlier 47s explainer (`src/explainer`) |
+| `PinaxExplainerVertical` | 1080x1920 | Earlier explainer, mobile layout       |
 
 ## Commands
 
 ```console
 npm i
 npx remotion studio
-npx remotion render PinaxExplainer out/PinaxExplainer.mp4
-npx remotion render PinaxExplainerVertical out/PinaxExplainerVertical.mp4
+npx remotion render PinaxAd out/PinaxAd.mp4
+npx remotion render PinaxAdVertical out/PinaxAdVertical.mp4
 ```
 
-## Where things live
+## The ad
 
-- `src/brand.ts`: colours, fonts, type sizes, scene lengths, beats and all on-screen copy. Edit this first.
-- `src/timeline.ts`: scene order and transitions; computes the total duration.
-- `src/scenes/`: one component per scene (Hook, Problem, Cost, Connect, AiAtWork, MakeItStick, Outro).
-- `src/components/`: `Gear`, `Mechanism`, `AppTile`, `Callout`, `PinaxWordmark`, `Headline`, `Glow`, `Icon`, `Person`, `PriceTag`.
-- `src/scenes/MechStage.tsx`: the mechanism and its hub icons on a plane that can tilt in 3D.
-- `src/lib/pulses.ts`: the light pulses that travel between tools, driven by the absolute frame so they flow across cuts.
-- `src/lib/gears.ts`: gear-train maths. Meshing gears turn in opposite directions at speeds inversely proportional to their tooth counts, phased so teeth sit in gaps.
-- `public/brand/`: reference SVGs of the wordmark. The video renders the wordmark live with `PinaxWordmark`.
+- `src/brand.ts`: tempo (`BPM`, `FRAMES_PER_BEAT`, `beats()`), colours, glass settings, fonts, type sizes, the SaaS name and price lists, the cluster groupings, all copy, the beat sheet (`shots`) and audio hit points. Edit this first.
+- `src/PinaxAd.tsx`: plays `shots` in order as hard cuts.
+- `src/scenes/Act1.tsx` to `Act4.tsx`: one component per shot. `Shot.tsx` adds the camera push, grain and vignette.
+- `src/components/`: `GlassCard`, `SaasTile`, `KineticHeadline`, `ChatWindow`, `Avatar`, `DataStream`, `Dashboard`, `PinaxWordmark`, `Padlock`, `Grain`, `Flash`.
+- Tile positions and the vortex use Remotion's seeded `random()`, so every render is identical.
 
-Background music: uncomment the `<Audio>` placeholder in `src/PinaxExplainer.tsx` and run `npx remotion add @remotion/media`.
+Background music: uncomment the `<Audio>` placeholder in `src/PinaxAd.tsx`, run `npx remotion add @remotion/media`, and line the track up with `hitPoints` in `src/brand.ts`.
+
+`public/brand/` holds reference SVGs of the wordmark; the videos render it live with `PinaxWordmark`.
