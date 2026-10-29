@@ -1,54 +1,30 @@
-# Remotion video
+# Pinax explainer video
 
-<p align="center">
-  <a href="https://github.com/remotion-dev/logo">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-dark.apng">
-      <img alt="Animated Remotion Logo" src="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-light.gif">
-    </picture>
-  </a>
-</p>
+A ~45 second motion graphic explainer for Pinax (pinax.ai), built with Remotion, React and TypeScript.
 
-Welcome to your Remotion project!
+| Composition              | Size      | FPS |
+| ------------------------ | --------- | --- |
+| `PinaxExplainer`         | 1920x1080 | 30  |
+| `PinaxExplainerVertical` | 1080x1920 | 30  |
+
+Both compositions use the same scene components. The layout switches on the video's aspect ratio (`src/lib/layout.ts`).
 
 ## Commands
 
-**Install Dependencies**
-
 ```console
 npm i
+npx remotion studio
+npx remotion render PinaxExplainer out/PinaxExplainer.mp4
+npx remotion render PinaxExplainerVertical out/PinaxExplainerVertical.mp4
 ```
 
-**Start Preview**
+## Where things live
 
-```console
-npm run dev
-```
+- `src/brand.ts`: colours, fonts, type sizes, scene lengths, beats and all on-screen copy. Edit this first.
+- `src/timeline.ts`: scene order and transitions; computes the total duration.
+- `src/scenes/`: one component per scene (Hook, Problem, Cost, Connect, AiAtWork, MakeItStick, Outro).
+- `src/components/`: `Gear`, `Mechanism`, `AppTile`, `Callout`, `PinaxWordmark`, `Headline`, `Icon`, `Person`, `PriceTag`.
+- `src/lib/gears.ts`: gear-train maths. Meshing gears turn in opposite directions at speeds inversely proportional to their tooth counts, phased so teeth sit in gaps.
+- `public/brand/`: reference SVGs of the wordmark. The video renders the wordmark live with `PinaxWordmark`.
 
-**Render video**
-
-```console
-npx remotion render
-```
-
-**Upgrade Remotion**
-
-```console
-npx remotion upgrade
-```
-
-## Docs
-
-Get started with Remotion by reading the [fundamentals page](https://www.remotion.dev/docs/the-fundamentals).
-
-## Help
-
-We provide help on our [Discord server](https://discord.gg/6VzzNDwUwV).
-
-## Issues
-
-Found an issue with Remotion? [File an issue here](https://github.com/remotion-dev/remotion/issues/new).
-
-## License
-
-Note that for some entities a company license is needed. [Read the terms here](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md).
+Background music: uncomment the `<Audio>` placeholder in `src/PinaxExplainer.tsx` and run `npx remotion add @remotion/media`.
