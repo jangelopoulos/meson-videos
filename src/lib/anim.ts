@@ -33,8 +33,11 @@ export const lin = (frame: number, from: number, to: number) =>
 export const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 
 /** Fast exit, 1 -> 0 over the last `motion.out` frames of a shot. */
-export const exitAt = (frame: number, duration: number, len: number = motion.out) =>
-  1 - progIn(frame, duration - len, duration);
+export const exitAt = (
+  frame: number,
+  duration: number,
+  len: number = motion.out,
+) => 1 - progIn(frame, duration - len, duration);
 
 /** Motion-blur smear (px) for a move whose progress is `p` (peaks mid-move). */
 export const smear = (p: number, amount = 14) =>

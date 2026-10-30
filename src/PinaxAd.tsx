@@ -21,9 +21,7 @@ import {
   ZoomWhite,
 } from "./scenes/Act3";
 import { Build, Cta, Wordmark } from "./scenes/Act4";
-
-// import { Audio } from "@remotion/media";
-// import { staticFile } from "remotion";
+import { Soundtrack } from "./components/Soundtrack";
 
 type ShotComponent = React.FC<{ dur: number }>;
 
@@ -62,9 +60,7 @@ const SHOTS: Record<ShotId, ShotComponent> = {
  */
 export const PinaxAd: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: colors.black }}>
-    {/* 120 BPM track, when ready (npx remotion add @remotion/media). Hit points: brand.ts `hitPoints`.
-    <Audio src={staticFile("audio/pinax-120bpm.mp3")} />
-    */}
+    <Soundtrack />
     <Series>
       {shots.map((s) => {
         const C = SHOTS[s.id];

@@ -512,7 +512,11 @@ export const Command: React.FC<ShotProps> = ({ dur }) => {
               <GlassCard
                 light
                 radius={22}
-                style={{ width: L.vertical ? 520 : 440, padding: "22px 28px", backgroundColor: colors.white }}
+                style={{
+                  width: L.vertical ? 520 : 440,
+                  padding: "22px 28px",
+                  backgroundColor: colors.white,
+                }}
               >
                 <div
                   style={{

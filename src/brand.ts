@@ -176,7 +176,8 @@ export const prices = [
  */
 export const logoBaseUrl =
   "https://vztgpzaddmrhqxtybwst.supabase.co/storage/v1/object/public/public_links/saas-logos";
-export const logoSlug = (name: string) => name.toLowerCase().replace(/[\s.]+/g, "-");
+export const logoSlug = (name: string) =>
+  name.toLowerCase().replace(/[\s.]+/g, "-");
 
 /** The six clusters in the "none of them talk" beat (indices into `saas`). */
 export const clusters = [
@@ -285,6 +286,81 @@ export const shotStartBeat = (() => {
 
 export const TOTAL_BEATS = shots.reduce((a, s) => a + s.beats, 0);
 export const TOTAL_FRAMES = beats(TOTAL_BEATS);
+
+// ---------------------------------------------------------------------------
+// Soundtrack (generated with ElevenLabs; files in public/audio/).
+// `at` is when a clip starts, in seconds. Each clip's leading silence is
+// already accounted for so the first word lands on the beat it targets.
+// ---------------------------------------------------------------------------
+export const soundtrack = {
+  /** Voice: Nora (British female), ElevenLabs v4. */
+  voiceover: [
+    {
+      src: "audio/vo/vo01.mp3",
+      at: 0.19,
+      text: "Your business runs on subscriptions. Dozens of them.",
+    },
+    {
+      src: "audio/vo/vo02.mp3",
+      at: 4.38,
+      text: "And none of them talk to each other.",
+    },
+    {
+      src: "audio/vo/vo03.mp3",
+      at: 6.66,
+      text: "So your team fills the gaps. By hand.",
+    },
+    {
+      src: "audio/vo/vo04.mp3",
+      at: 10.91,
+      text: "You became the integration.",
+    },
+    {
+      src: "audio/vo/vo05.mp3",
+      at: 13.18,
+      text: "Everyone's talking about AI.",
+    },
+    {
+      src: "audio/vo/vo07.mp3",
+      at: 16.51,
+      text: "AI is only as good as the data it can see.",
+    },
+    { src: "audio/vo/vo08.mp3", at: 19.45, text: "We had the same problem." },
+    {
+      src: "audio/vo/vo09.mp3",
+      at: 21.67,
+      text: "So we pulled it all into one secure system.",
+    },
+    {
+      src: "audio/vo/vo10.mp3",
+      at: 27.0,
+      text: "No per-seat pricing. Everything in one place. Your design, your training.",
+    },
+    {
+      src: "audio/vo/vo11.mp3",
+      at: 31.81,
+      text: "And AI that actually knows your business.",
+    },
+    {
+      src: "audio/vo/vo13.mp3",
+      at: 36.93,
+      rate: 1.1,
+      text: "One system. Your data. AI that works for you.",
+    },
+    {
+      src: "audio/vo/vo15.mp3",
+      at: 41.04,
+      rate: 1.03,
+      text: "Pinax. Your whole business, working as one system.",
+    },
+  ] as { src: string; at: number; rate?: number; text: string }[],
+  /** 120 BPM instrumental. Starting it 2.28s in puts its beats on our grid
+   * and its lift on the padlock beat. */
+  music: { src: "audio/music.mp3", at: 2.28, volume: 0.8, duckedVolume: 0.32 },
+  voiceVolume: 1,
+  /** Seconds to ramp the music down/up around each voice line. */
+  duckRamp: 0.15,
+};
 
 /** Hit points (in seconds) for syncing a 120 BPM track later. */
 export const hitPoints = {
