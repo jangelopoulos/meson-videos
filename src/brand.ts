@@ -1,5 +1,5 @@
 /**
- * Pinax ad: brand, tempo, beat sheet and copy.
+ * Pinax ad (pinaxai.com): brand, tempo, beat sheet and copy.
  *
  * Everything you are likely to tweak lives here. Change BPM to retime the
  * whole edit; change a shot's `beats` to lengthen or shorten it.
@@ -168,6 +168,16 @@ export const prices = [
   "$150/MO",
 ];
 
+/**
+ * Real product logos. `npm run fetch-logos` downloads `${logoBaseUrl}/<slug>.png`
+ * into public/logos/ and records which arrived in src/logos-available.json.
+ * Tiles show a logo when one is available and fall back to the initial.
+ * Slug: lower-case name with spaces and dots as hyphens ("Monday.com" -> "monday-com").
+ */
+export const logoBaseUrl =
+  "https://vztgpzaddmrhqxtybwst.supabase.co/storage/v1/object/public/public_links/saas-logos";
+export const logoSlug = (name: string) => name.toLowerCase().replace(/[\s.]+/g, "-");
+
 /** The six clusters in the "none of them talk" beat (indices into `saas`). */
 export const clusters = [
   { label: "CRM", tools: [0, 1, 2] },
@@ -225,7 +235,7 @@ export const copy = {
     text: "Your whole business, working as one system.",
     highlight: "one system.",
   },
-  url: "PINAX.AI",
+  url: "PINAXAI.COM",
 } as const;
 
 // ---------------------------------------------------------------------------

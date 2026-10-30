@@ -1,10 +1,15 @@
 import React from "react";
-import { colors, fonts, type } from "../brand";
+import { Img, staticFile } from "remotion";
+import { colors, fonts, logoSlug, type } from "../brand";
+import available from "../logos-available.json";
 import { GlassCard } from "./GlassCard";
 
+const LOGOS = new Set<string>(available);
+
 /**
- * A third-party product shown by name only: frosted tile, monochrome initial,
- * product name and a mono price tag. `peel` (0..1) lifts the name and price off.
+ * A third-party product: frosted tile, its logo on a white disc (or a
+ * monochrome initial when no logo is downloaded), the name and a mono price
+ * tag. `peel` (0..1) lifts the name and price off.
  */
 export const SaasTile: React.FC<{
   name: string;
@@ -16,6 +21,8 @@ export const SaasTile: React.FC<{
 }> = ({ name, price, width, solid, peel = 0, style }) => {
   const h = width * 0.34;
   const d = h * 0.52;
+  const slug = logoSlug(name);
+  const logo = LOGOS.has(slug);
   return (
     <GlassCard
       solid={solid}
@@ -36,8 +43,9 @@ export const SaasTile: React.FC<{
           height: d,
           flexShrink: 0,
           borderRadius: "50%",
-          border: "1.5px solid rgba(255,255,255,0.35)",
-          backgroundColor: "rgba(255,255,255,0.06)",
+          border: logo ? "none" : "1.5px solid rgba(255,255,255,0.35)",
+          backgroundColor: logo ? colors.white : "rgba(255,255,255,0.06)",
+          overflow: "hidden",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -47,7 +55,14 @@ export const SaasTile: React.FC<{
           color: colors.white,
         }}
       >
-        {name[0]}
+        {logo ? (
+          <Img
+            src={staticFile(`logos/${slug}.png`)}
+            style={{ width: "64%", height: "64%", objectFit: "contain" }}
+          />
+        ) : (
+          name[0]
+        )}
       </div>
       <div
         style={{

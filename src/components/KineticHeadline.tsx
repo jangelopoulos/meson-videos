@@ -73,13 +73,23 @@ export const KineticHeadline: React.FC<Props> = ({
               { ...clamp, easing: snap },
             );
             const pout = Number.isFinite(exitStart)
-              ? interpolate(frame, [exitStart, exitStart + motion.out - 1], [0, 1], {
-                  ...clamp,
-                  easing: snap,
-                })
+              ? interpolate(
+                  frame,
+                  [exitStart, exitStart + motion.out - 1],
+                  [0, 1],
+                  {
+                    ...clamp,
+                    easing: snap,
+                  },
+                )
               : 0;
-            const y = (1 - pin) * 105 - pout * 105;
+            // Travel well past the mask (it has descender padding) and fade
+            // with the move, so no blurred edge peeks in before or after.
+            const y = (1 - pin) * 150 - pout * 150;
             const blur = (1 - pin) * 10 + pout * 10;
+            const opacity =
+              Math.min(1, Math.max(0, (pin - 0.25) / 0.35)) *
+              Math.min(1, Math.max(0, (0.75 - pout) / 0.35));
             const isHl = hlWords.has(strip(word));
             return (
               <React.Fragment key={wi}>
@@ -98,6 +108,7 @@ export const KineticHeadline: React.FC<Props> = ({
                     style={{
                       display: "inline-block",
                       translate: `0 ${y}%`,
+                      opacity,
                       filter: blur > 0.2 ? `blur(${blur}px)` : undefined,
                       color: isHl ? colors.signal : undefined,
                     }}
