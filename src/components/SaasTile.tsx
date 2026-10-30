@@ -7,7 +7,7 @@ import { GlassCard } from "./GlassCard";
 const LOGOS = new Set<string>(available);
 
 /**
- * A third-party product: frosted tile, its logo on a white disc (or a
+ * A third-party product: frosted tile, its logo on a white chip (or a
  * monochrome initial when no logo is downloaded), the name and a mono price
  * tag. `peel` (0..1) lifts the name and price off.
  */
@@ -42,7 +42,7 @@ export const SaasTile: React.FC<{
           width: d,
           height: d,
           flexShrink: 0,
-          borderRadius: "50%",
+          borderRadius: logo ? d * 0.26 : "50%",
           border: logo ? "none" : "1.5px solid rgba(255,255,255,0.35)",
           backgroundColor: logo ? colors.white : "rgba(255,255,255,0.06)",
           overflow: "hidden",
@@ -58,7 +58,7 @@ export const SaasTile: React.FC<{
         {logo ? (
           <Img
             src={staticFile(`logos/${slug}.png`)}
-            style={{ width: "64%", height: "64%", objectFit: "contain" }}
+            style={{ width: "80%", height: "80%", objectFit: "contain" }}
           />
         ) : (
           name[0]
