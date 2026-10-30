@@ -293,7 +293,7 @@ export const TOTAL_FRAMES = beats(TOTAL_BEATS);
 // already accounted for so the first word lands on the beat it targets.
 // ---------------------------------------------------------------------------
 export const soundtrack = {
-  /** Voice: Nora (British female), ElevenLabs v4. */
+  /** Voice: Amelia (young Australian female), ElevenLabs v4. */
   voiceover: [
     {
       src: "audio/vo/vo01.mp3",
@@ -302,55 +302,55 @@ export const soundtrack = {
     },
     {
       src: "audio/vo/vo02.mp3",
-      at: 4.38,
+      at: 4.42,
       text: "And none of them talk to each other.",
     },
     {
       src: "audio/vo/vo03.mp3",
-      at: 6.66,
+      at: 6.64,
       text: "So your team fills the gaps. By hand.",
     },
     {
       src: "audio/vo/vo04.mp3",
-      at: 10.91,
+      at: 10.92,
       text: "You became the integration.",
     },
     {
       src: "audio/vo/vo05.mp3",
-      at: 13.18,
+      at: 13.19,
       text: "Everyone's talking about AI.",
     },
     {
       src: "audio/vo/vo07.mp3",
-      at: 16.51,
+      at: 16.44,
       text: "AI is only as good as the data it can see.",
     },
-    { src: "audio/vo/vo08.mp3", at: 19.45, text: "We had the same problem." },
+    { src: "audio/vo/vo08.mp3", at: 19.78, text: "We had the same problem." },
     {
       src: "audio/vo/vo09.mp3",
-      at: 21.67,
+      at: 21.75,
       text: "So we pulled it all into one secure system.",
     },
     {
       src: "audio/vo/vo10.mp3",
-      at: 27.0,
+      at: 27.01,
       text: "No per-seat pricing. Everything in one place. Your design, your training.",
     },
     {
       src: "audio/vo/vo11.mp3",
-      at: 31.81,
+      at: 32.21,
       text: "And AI that actually knows your business.",
     },
     {
       src: "audio/vo/vo13.mp3",
-      at: 36.93,
-      rate: 1.1,
+      at: 36.81,
+      rate: 1.12,
       text: "One system. Your data. AI that works for you.",
     },
     {
       src: "audio/vo/vo15.mp3",
-      at: 41.04,
-      rate: 1.03,
+      at: 40.99,
+      rate: 1.09,
       text: "Pinax. Your whole business, working as one system.",
     },
   ] as { src: string; at: number; rate?: number; text: string }[],

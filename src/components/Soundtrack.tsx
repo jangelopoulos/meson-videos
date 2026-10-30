@@ -5,18 +5,18 @@ import { FPS, soundtrack } from "../brand";
 
 /** Seconds of speech in each clip (measured from the files), for ducking. */
 const SPEECH: Record<string, number> = {
-  "audio/vo/vo01.mp3": 3.44,
-  "audio/vo/vo02.mp3": 2.2,
-  "audio/vo/vo03.mp3": 2.31,
-  "audio/vo/vo04.mp3": 2.26,
+  "audio/vo/vo01.mp3": 3.43,
+  "audio/vo/vo02.mp3": 2.09,
+  "audio/vo/vo03.mp3": 2.51,
+  "audio/vo/vo04.mp3": 2.17,
   "audio/vo/vo05.mp3": 1.97,
-  "audio/vo/vo07.mp3": 3.02,
-  "audio/vo/vo08.mp3": 1.79,
-  "audio/vo/vo09.mp3": 3.14,
-  "audio/vo/vo10.mp3": 4.79,
-  "audio/vo/vo11.mp3": 2.92,
-  "audio/vo/vo13.mp3": 4.43,
-  "audio/vo/vo15.mp3": 4.04,
+  "audio/vo/vo07.mp3": 3.49,
+  "audio/vo/vo08.mp3": 1.98,
+  "audio/vo/vo09.mp3": 3.2,
+  "audio/vo/vo10.mp3": 5.2,
+  "audio/vo/vo11.mp3": 3.2,
+  "audio/vo/vo13.mp3": 4.7,
+  "audio/vo/vo15.mp3": 4.31,
 };
 
 /** Voice windows in absolute seconds. */
